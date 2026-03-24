@@ -5,7 +5,13 @@ import { SkillBadge } from "@/components/ui/SkillBadge";
 import { skills } from "@/data/portfolio";
 
 export function Skills() {
-  const categories = ["Languages", "ML & AI", "Tools & Cloud"] as const;
+  const categories = [
+    "Languages & Libraries",
+    "AI/ML & NLP",
+    "Cloud & MLOps",
+    "Data Engineering",
+    "Visualization & Tools",
+  ] as const;
 
   return (
     <SectionWrapper id="skills">
