@@ -1,6 +1,6 @@
 # vanshikagurbani.github.io
 
-Personal portfolio of **Vanshika Gurbani**, AI Engineer, Research Assistant, and MS in Statistics & Data Science from Rutgers University.
+Personal portfolio of **Vanshika Gurbani** - AI Engineer, Research Assistant, and MS in Statistics & Data Science from Rutgers University.
 
 Live at: [vanshikagurbani.github.io](https://vanshikagurbani.github.io)
 
