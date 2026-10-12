@@ -53,6 +53,7 @@ export const skills: Skill[] = [
   { name: "R", category: "Languages" },
   { name: "SQL", category: "Languages" },
   { name: "Bash", category: "Languages" },
+  { name: "Java", category: "Languages" },
 
   // AI & LLM Systems
   { name: "PyTorch", category: "AI & LLM Systems" },
@@ -67,6 +68,7 @@ export const skills: Skill[] = [
   { name: "Semantic Retrieval", category: "AI & LLM Systems" },
   { name: "Embeddings", category: "AI & LLM Systems" },
   { name: "Prompt Engineering", category: "AI & LLM Systems" },
+  { name: "Natural Language Processing", category: "AI & LLM Systems" },
   { name: "LLM Evaluation", category: "AI & LLM Systems" },
   { name: "SentenceTransformers", category: "AI & LLM Systems" },
 
@@ -83,6 +85,11 @@ export const skills: Skill[] = [
 
   // ML & Data
   { name: "Statistical Modeling", category: "ML & Data" },
+  { name: "Regression", category: "ML & Data" },
+  { name: "Time Series Analysis", category: "ML & Data" },
+  { name: "Surrogate Modeling", category: "ML & Data" },
+  { name: "Clustering", category: "ML & Data" },
+  { name: "A/B Testing", category: "ML & Data" },
   { name: "Gradient Boosting", category: "ML & Data" },
   { name: "Random Forests", category: "ML & Data" },
   { name: "PuLP", category: "ML & Data" },
@@ -99,6 +106,7 @@ export const skills: Skill[] = [
 
   // Cloud & DevOps
   { name: "Docker", category: "Cloud & DevOps" },
+  { name: "Kubernetes", category: "Cloud & DevOps" },
   { name: "Git", category: "Cloud & DevOps" },
   { name: "GitHub Actions", category: "Cloud & DevOps" },
   { name: "CI/CD", category: "Cloud & DevOps" },
@@ -126,7 +134,7 @@ export const experiences: Experience[] = [
     bullets: [
       "Ported a **legacy MATLAB granulation codebase** into **Python ML pipelines**, cutting simulation runtime by **35%** and validation time by **60%**, with automated benchmarking that verifies numerical parity against the original models.",
       "Trained **Gradient Boosting and Random Forest surrogate models** on **150 simulation cases**, iteratively expanded through targeted data generation, achieving **98% accuracy** against held-out data and replacing multi-hour physics simulations with **sub-second predictions** of manufacturing outcomes.",
-      "Diagnosed a **systematic model error** through controlled variable-isolation testing, cutting worst-case prediction error from **47% to 3.6%** by fine-tuning against validated reference cases.",
+      "Diagnosed a **systematic model error** through controlled variable-isolation testing, cutting worst-case prediction error from **47% to 8.6%** by fine-tuning against validated reference cases.",
       "Owned **CI/CD**, environment setup, and deployment for shared research tools across **GitHub Codespaces**, **JupyterHub**, and **SLURM**-based university HPC systems, used daily by NSF program managers and lab researchers.",
       "Automated reviewer assignment with conflict-of-interest checks for NSF grant panels using **PuLP optimization** and **SentenceTransformer + TF-IDF** semantic matching, replacing a **days-long manual process** with an 8-app Streamlit platform.",
       "Built an AI tool grouping and summarizing NSF proposals by topic using **KeyBERT + fuzzy c-means clustering** and a **4-model HuggingFace summarization pipeline** (BART, Pegasus, T5), removing manual review across **30+ proposals per cycle**.",
@@ -134,7 +142,7 @@ export const experiences: Experience[] = [
     ],
   },
   {
-    role: "Software Engineer (Contract)",
+    role: "Software Engineer Intern",
     company: "ContinuumCare.ai",
     date: "Oct 2025 - Nov 2025",
     description:
@@ -225,14 +233,15 @@ export const projects: Project[] = [
     highlights: [
       "**3-node LangGraph pipeline** (Claim Extractor, Retriever, Scorer) over **~844 guideline chunks** from NICE NG28, NG136, CG181, and AHA 2025 CPR; embeddings via **all-MiniLM-L6-v2** with cosine similarity search in **ChromaDB**.",
       "**Live web augmentation** via Tavily API fires when corpus similarity falls below 0.35, pulling from NIH, WHO, PubMed, Mayo Clinic, and NICE; results shown with a live web badge alongside guideline citations.",
-      "Per-claim **SUPPORTED / UNSUPPORTED / CONTRADICTED verdicts** with rationale and page-level citations; aggregated into a **trust score (0-100)**, hallucination rate %, and source coverage %, validated end-to-end with **RAGAS evaluation**.",
+      "Per-claim **SUPPORTED / UNSUPPORTED / CONTRADICTED verdicts** with rationale and page-level citations; aggregated into a **trust score (0-100)**, **hallucination rate %**, and **source coverage %**, all computed directly from pipeline output.",
       "**Corrected answer** rewrite grounded in retrieved passages with clickable citations; **multi-turn follow-up chat** persisted per evaluation and shareable by URL with no account required.",
-      "Cut backend memory by **70%** by switching from PyTorch-based SentenceTransformers to **ONNX-quantized FastEmbed** embeddings, keeping retrieval quality intact at a fraction of the resource cost.",
+      "Cut peak memory by **45%** by replacing PyTorch-based SentenceTransformers with **ONNX-quantized FastEmbed** embeddings (same all-MiniLM-L6-v2 model), so the backend fits Render's **512 MB** free tier.",
       "Full-stack: **FastAPI + SQLAlchemy** backend deployed across **Render** and **Neon serverless PostgreSQL**, **React 18 + TypeScript + Tailwind** frontend on **Vercel**, with health checks, automatic restarts, and push-to-deploy continuous deployment; evaluation history sidebar with rename and delete.",
     ],
     tech: [
       "LangGraph",
       "LLaMA 3.3 70B (Groq)",
+      "Claude API (fallback)",
       "ChromaDB",
       "FastEmbed (ONNX)",
       "Tavily",
@@ -252,7 +261,7 @@ export const projects: Project[] = [
     description:
       "Built an AI-powered DevOps agent that monitors production deployments in real time, scans for failures and security issues, and autonomously generates and opens GitHub pull requests with fixes. Integrated with Slack for operator-facing slash commands.",
     highlights: [
-      "**Live deployment monitoring** via Vercel webhooks in real time; automatically detects build failures, runtime errors, and security vulnerabilities and triggers the fix pipeline without human intervention.",
+      "**Recursive detect-diagnose-fix loop** over live deployments: Vercel webhooks surface build failures, runtime errors, and security vulnerabilities in real time and trigger the fix pipeline without human intervention.",
       "**Autonomous PR generation** using the GitHub API: the agent diagnoses the root cause, writes a patch, and opens a pull request with a structured description ready for review.",
       "**Slack integration** with slash commands for rollbacks, incident queries, and system status checks, giving teams a natural language interface to the agent.",
       "Powered by **Gemini 3 Flash** via the Vercel AI SDK for diagnosis and code generation; **Supabase** for persisting incident history and deployment state.",
@@ -265,7 +274,7 @@ export const projects: Project[] = [
     tagline:
       "NLP system that tags genes, diseases, and chemicals in biomedical text, comparing single-task and multi-task BioBERT.",
     description:
-      "Fine-tuned BioBERT v1.1 as a token-level tagger on 5 biomedical benchmark corpora and compared single-task learning against a multi-task model with a shared encoder and per-dataset heads.",
+      "M.S. thesis project. Fine-tuned BioBERT v1.1 as a token-level tagger on 5 biomedical benchmark corpora and compared single-task learning against a multi-task model with a shared encoder and per-dataset heads.",
     highlights: [
       "Benchmarked across **5 corpora** (BC2GM, BC4CHEMD, BC5CDR, JNLPBA, NCBI Disease) using **IOBES tagging**; fine-tuned for 3 epochs (learning rate 5e-5, batch size 8).",
       "Single-task **macro-F1 over entity tags** (token-level): **0.93** BC4CHEMD, **0.91** NCBI Disease, **0.88** BC2GM, **0.86** BC5CDR, **0.71** JNLPBA; overall token accuracy of 0.93 to 0.99 is inflated by the majority non-entity class.",
@@ -518,8 +527,8 @@ export const contactData = {
 };
 
 export const metrics = [
-  { label: "Faster Inference", value: "~40%" },
-  { label: "NER F1 Score", value: "0.99" },
+  { label: "Simulation Runtime Cut", value: "35%" },
+  { label: "Best NER Macro-F1", value: "0.93" },
   { label: "Students Taught", value: "200+" },
   { label: "Medical Sources", value: "6+" },
 ];
