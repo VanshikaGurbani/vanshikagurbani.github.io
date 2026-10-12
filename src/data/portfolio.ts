@@ -263,14 +263,14 @@ export const projects: Project[] = [
   {
     name: "BioNER: Multi-task Biomedical NER",
     tagline:
-      "NLP system that reads biomedical text and extracts genes, diseases, and chemicals with near-perfect accuracy.",
+      "NLP system that tags genes, diseases, and chemicals in biomedical text, comparing single-task and multi-task BioBERT.",
     description:
-      "Built a multi-task learning model using BioBERT v1.1 to extract biomedical entities from 5 benchmark corpora. Compared single-task vs multi-task approaches to find what works best for low-resource biomedical datasets.",
+      "Fine-tuned BioBERT v1.1 as a token-level tagger on 5 biomedical benchmark corpora and compared single-task learning against a multi-task model with a shared encoder and per-dataset heads.",
     highlights: [
-      "Achieved **F1=0.98** on BC2GM gene recognition and **F1=0.99** on NCBI Disease extraction.",
-      "Benchmarked across **5 corpora** (BC2GM, BC4CHEMD, BC5CDR, JNLPBA, NCBI Disease) using IOBES tagging.",
-      "Multi-task model showed **stronger cross-dataset generalization** on smaller datasets vs single-task.",
-      "Engineered preprocessing with **token alignment and dynamic batching** for efficient fine-tuning.",
+      "Benchmarked across **5 corpora** (BC2GM, BC4CHEMD, BC5CDR, JNLPBA, NCBI Disease) using **IOBES tagging**; fine-tuned for 3 epochs (learning rate 5e-5, batch size 8).",
+      "Single-task **macro-F1 over entity tags** (token-level): **0.93** BC4CHEMD, **0.91** NCBI Disease, **0.88** BC2GM, **0.86** BC5CDR, **0.71** JNLPBA; overall token accuracy of 0.93 to 0.99 is inflated by the majority non-entity class.",
+      "The **multi-task model matched or slightly trailed** single-task (for example BC2GM macro-F1 0.86 vs 0.88), at higher GPU and training cost.",
+      "Engineered preprocessing with **word-piece token alignment** to IOBES labels and **dynamic batching**, and handled heavy class imbalance (most tokens are non-entity).",
     ],
     tech: ["PyTorch", "BioBERT", "HuggingFace", "Multi-task Learning"],
     github: "https://github.com/VanshikaGurbani/Multi-BIONER",
@@ -278,16 +278,16 @@ export const projects: Project[] = [
   {
     name: "True Image Caption Generator",
     tagline:
-      "Hybrid vision-language model that generates human-like descriptions of images using CNN + Transformers.",
+      "Image captioning with CNN + LSTM and CNN + Transformer models, compared on the Flickr8k dataset.",
     description:
-      "Built an image captioning system combining InceptionV3 for visual features with a dual-mode Transformer decoder. Trained on 120K+ images and deployed as a real-time Streamlit web app.",
+      "Undergraduate thesis project that generates natural-language captions for images. Implemented a CNN + LSTM baseline and an InceptionV3 + Transformer encoder-decoder in TensorFlow/Keras and compared their captions.",
     highlights: [
-      "Achieved **BLEU score of 0.80** on MS-COCO evaluation set.",
-      "Trained on **120K+ labeled images** across MS-COCO, Flickr8k, and Flickr30k datasets.",
-      "Dual-mode decoding: **greedy search** for speed, **beam search** for caption quality.",
-      "Deployed as a **Streamlit web app** for real-time caption prediction from uploaded images.",
+      "Built **two captioning pipelines**: a **CNN + LSTM** model (VGG16 / Xception image features) and an **InceptionV3 + Transformer** encoder-decoder with multi-head attention.",
+      "Trained on **Flickr8k** image-caption pairs with tokenization, feature extraction, and caption decoding in **TensorFlow/Keras**.",
+      "Compared **LSTM vs. Transformer** captions with **BLEU**: per-image scores of **0.71 to 0.73** on strong examples and near **0** on failures, which showed the Transformer producing more accurate captions.",
+      "Documented the work in a full undergraduate thesis report and a command-line caption generator.",
     ],
-    tech: ["CNN", "Transformers", "InceptionV3", "Streamlit"],
+    tech: ["TensorFlow", "Keras", "CNN", "LSTM", "Transformers", "InceptionV3"],
     github: "https://github.com/VanshikaGurbani/Image-Caption",
   },
   {
@@ -295,14 +295,14 @@ export const projects: Project[] = [
     tagline:
       "Causal inference study measuring whether growth mindset interventions actually improve student achievement.",
     description:
-      "Used multiple causal estimators on 10K+ education records to estimate the real treatment effect of growth mindset programs, not just correlation.",
+      "Used multiple causal estimators on 10,391 synthetic student records modeled on the National Study of Learning Mindsets to estimate the treatment effect of a growth mindset program, not just correlation.",
     highlights: [
-      "Analyzed **10K+ observational education records** modeled after the National Study of Learning Mindsets.",
-      "Applied **5 causal estimators**: Causal Forests, IPW, S-Learner, T-Learner, and X-Learner.",
-      "Found **consistent positive causal effect** across all methods, confirming estimator-agnostic robustness.",
-      "Built **propensity score models** to control for confounders in observational data.",
+      "Analyzed **10,391 synthetic student records** (76 schools, 32.6% treated) modeled on the National Study of Learning Mindsets, with a continuous achievement outcome.",
+      "Applied **seven specifications across four method families**: regression adjustment, **IPW**, **T-Learner** and **S-Learner** (Random Forest and XGBoost), and **Causal Forest** (EconML).",
+      "Estimated an **ATE of about 0.41 to 0.42** outcome units in every specification (95% CI roughly **0.39 to 0.44** for regression and IPW; Causal Forest **0.42**, CI 0.20 to 0.63), showing **estimator-agnostic robustness**.",
+      "Used **propensity score models**, overlap checks, and **covariate balance (Love plot, SMD)**; adjustment moved the naive difference of 0.46 to about 0.41. Presented results on an academic research poster.",
     ],
-    tech: ["Python", "Causal Inference", "EconML", "Scikit-learn", "R"],
+    tech: ["Python", "Causal Inference", "EconML", "Scikit-learn", "XGBoost"],
     github: "https://github.com/VanshikaGurbani/growth-mindset-intervention",
   },
   {
