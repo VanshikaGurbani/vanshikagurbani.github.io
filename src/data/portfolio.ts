@@ -149,8 +149,8 @@ export const experiences: Experience[] = [
       "Built an **AI-powered RAG-based health assistant** using **Python**, **LangGraph**, and the **Claude API**.",
     bullets: [
       "Developed a **RAG health assistant** integrating **6+ medical guideline sources** (AHA, SSATHI, NICE, PRANA) to generate evidence-based insights with **2-3 citations per response**.",
-      "Raised response accuracy from **74% to 88%** on a **150-question evaluation set** through guideline-aware query rewriting over a **3-node LangGraph RAG pipeline** (profile loading, guideline retrieval, response generation) with the **Claude API**, dynamically selecting guidelines by patient demographics and query intent to **reduce hallucination risk**, while cutting median response time from **2 minutes to 45 seconds** with response streaming and result caching.",
-      "As the **sole engineer**, built and deployed a **Streamlit web application in eight weeks** supporting multi-profile management, structured health data uploads (labs, vitals, history), **real-time AI health summarization**, and **PDF report generation**, forming the **MVP** for the company's digital health assistant.",
+      "Raised answer accuracy from **74% to 88%** on a **150-question evaluation set** by building **dynamic, demographic-based guideline retrieval** across **6+ sources** with Python and the **Claude API**, and cut response time by **62.5% (2 minutes to 45 seconds)** with response caching.",
+      "As the **sole engineer**, built the company's patient-facing health assistant **MVP** in **Streamlit** on a **3-node LangGraph pipeline** (profile loading, guideline retrieval, response generation), with multi-profile management, medical record uploads, real-time AI summaries, and exportable **PDF reports**.",
     ],
   },
   {
