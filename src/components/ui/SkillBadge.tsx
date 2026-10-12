@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface SkillBadgeProps {
@@ -9,15 +10,17 @@ interface SkillBadgeProps {
 
 export function SkillBadge({ name, className }: SkillBadgeProps) {
   return (
-    <span
+    <motion.span
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.97 }}
       className={cn(
-        "inline-flex items-center px-4 py-2 rounded-full text-sm font-medium",
+        "inline-flex items-center px-5 py-2.5 rounded-full text-base font-medium cursor-default",
         "bg-card border border-border transition-all duration-200",
         "hover:border-accent/40 hover:bg-card-hover hover:shadow-sm",
         className
       )}
     >
       {name}
-    </span>
+    </motion.span>
   );
 }

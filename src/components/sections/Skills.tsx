@@ -6,11 +6,12 @@ import { skills } from "@/data/portfolio";
 
 export function Skills() {
   const categories = [
-    "Languages & Libraries",
-    "AI/ML & NLP",
-    "Cloud & MLOps",
-    "Data Engineering",
-    "Visualization & Tools",
+    "Languages",
+    "AI & LLM Systems",
+    "Backend & Frontend",
+    "ML & Data",
+    "Visualization",
+    "Cloud & DevOps",
   ] as const;
 
   return (

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { GradientBlobs } from "@/components/ui/GradientBlobs";
 import "./globals.css";
 
 const inter = Inter({
@@ -11,11 +12,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Vanshika Gurbani — Data Scientist & ML Engineer",
+  title: "Vanshika Gurbani | AI Engineer & Data Scientist",
   description:
     "Graduate Data Scientist passionate about solving problems using Machine Learning, NLP, and intelligent systems. Portfolio showcasing projects in ML, NLP, causal inference, and analytics.",
   openGraph: {
-    title: "Vanshika Gurbani — Data Scientist & ML Engineer",
+    title: "Vanshika Gurbani | AI Engineer & Data Scientist",
     description:
       "Graduate Data Scientist passionate about Machine Learning, NLP, and intelligent systems.",
     url: "https://vanshikagurbani.github.io",
@@ -30,10 +31,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      </head>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>
+          <GradientBlobs />
           <Navbar />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 relative z-10">{children}</main>
           <Footer />
         </ThemeProvider>
       </body>
