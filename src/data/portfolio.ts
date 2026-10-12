@@ -267,7 +267,7 @@ export const projects: Project[] = [
       "Powered by **Gemini 3 Flash** via the Vercel AI SDK for diagnosis and code generation; **Supabase** for persisting incident history and deployment state.",
     ],
     tech: ["Next.js", "Vercel AI SDK", "Gemini 3 Flash", "Supabase", "GitHub API", "Slack"],
-    github: "https://github.com/sugarwatermelon300-crypto/zerotoagent",
+    github: "https://github.com/VanshikaGurbani/aidevopsagent",
   },
   {
     name: "BioNER: Multi-task Biomedical NER",
@@ -277,8 +277,8 @@ export const projects: Project[] = [
       "M.S. thesis project. Fine-tuned BioBERT v1.1 as a token-level tagger on 5 biomedical benchmark corpora and compared single-task learning against a multi-task model with a shared encoder and per-dataset heads.",
     highlights: [
       "Benchmarked across **5 corpora** (BC2GM, BC4CHEMD, BC5CDR, JNLPBA, NCBI Disease) using **IOBES tagging**; fine-tuned for 3 epochs (learning rate 5e-5, batch size 8).",
-      "Single-task **macro-F1 over entity tags** (token-level): **0.93** BC4CHEMD, **0.91** NCBI Disease, **0.88** BC2GM, **0.86** BC5CDR, **0.71** JNLPBA; overall token accuracy of 0.93 to 0.99 is inflated by the majority non-entity class.",
-      "The **multi-task model matched or slightly trailed** single-task (for example BC2GM macro-F1 0.86 vs 0.88), at higher GPU and training cost.",
+      "Single-task **token-level macro-F1 across IOBES tags** (including the non-entity class): **0.93** BC4CHEMD, **0.91** NCBI Disease, **0.88** BC2GM, **0.86** BC5CDR, **0.71** JNLPBA; overall token accuracy of 0.93 to 0.99 is inflated by the majority non-entity class.",
+      "The **multi-task model matched or slightly trailed** single-task (for example BC2GM macro-F1 0.86 vs 0.88, a gap of 0.00 to 0.02 across datasets), at higher GPU and training cost.",
       "Engineered preprocessing with **word-piece token alignment** to IOBES labels and **dynamic batching**, and handled heavy class imbalance (most tokens are non-entity).",
     ],
     tech: ["PyTorch", "BioBERT", "HuggingFace", "Multi-task Learning"],
