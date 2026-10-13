@@ -138,7 +138,6 @@ export const experiences: Experience[] = [
       "Owned **CI/CD**, environment setup, and deployment for shared research tools across **GitHub Codespaces**, **JupyterHub**, and **SLURM**-based university HPC systems, used daily by NSF program managers and lab researchers.",
       "Automated reviewer assignment with conflict-of-interest checks for NSF grant panels using **PuLP optimization** and **SentenceTransformer + TF-IDF** semantic matching, replacing a **days-long manual process** with an 8-app Streamlit platform.",
       "Built an AI tool grouping and summarizing NSF proposals by topic using **KeyBERT + fuzzy c-means clustering** and a **4-model HuggingFace summarization pipeline** (BART, Pegasus, T5), removing manual review across **30+ proposals per cycle**.",
-      "Deployed **NutriPulse**, a production nutrition app with **dual-API food search** (CalorieNinjas + USDA, **380K+ foods**), **custom 5-dimensional relevance scoring** reducing match errors by **75%**, and Plotly analytics dashboards.",
     ],
   },
   {
@@ -268,6 +267,22 @@ export const projects: Project[] = [
     ],
     tech: ["Next.js", "Vercel AI SDK", "Gemini 3 Flash", "Supabase", "GitHub API", "Slack"],
     github: "https://github.com/VanshikaGurbani/aidevopsagent",
+  },
+  {
+    name: "NutriPulse",
+    tagline:
+      "Nutrition and fitness tracker that turns plain-English meals into macro breakdowns using two food-data APIs.",
+    description:
+      "Personal project: a Streamlit app where you type meals like \"2 cups white rice with carrots\" and get calories, macros, goals, and insights, with CalorieNinjas for natural-language parsing and USDA FoodData Central as a fallback.",
+    highlights: [
+      "**Dual-API food search**: CalorieNinjas NLP parses quantities and ingredients; the app falls back automatically to the **USDA FoodData Central** database (380K+ foods) when no result is found.",
+      "Wrote a **heuristic relevance scorer** for USDA matches (first-token match, wrong-category penalty, cooked/raw context, calorie sanity cap) to avoid results like \"Bread, oatmeal\" for the query \"oatmeal\".",
+      "Built a 4-tab app with a **TDEE calculator** (Mifflin-St Jeor), A-F **nutrition grade**, exercise tracker with MET-based calorie burn, and **Plotly** radar, donut, and trend charts.",
+      "Deployed on **Streamlit Community Cloud**; API keys kept in environment secrets; CSV export for logs and history.",
+    ],
+    tech: ["Python", "Streamlit", "Plotly", "Pandas", "USDA FoodData Central", "CalorieNinjas API"],
+    github: "https://github.com/VanshikaGurbani/NutriPulse",
+    live: "https://nutripulse.streamlit.app/",
   },
   {
     name: "BioNER: Multi-task Biomedical NER",
