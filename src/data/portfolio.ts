@@ -315,18 +315,18 @@ export const projects: Project[] = [
     github: "https://github.com/VanshikaGurbani/growth-mindset-intervention",
   },
   {
-    name: "Airbnb Revenue Analytics",
+    name: "Enhancing Airbnb Revenue: Dynamic Price Modeling",
     tagline:
-      "End-to-end analytics pipeline that predicts and optimizes Airbnb listing revenue using ML and geospatial analysis.",
+      "Pricing analytics pipeline that models Airbnb listing prices with regression to support data-driven pricing strategies for hosts.",
     description:
-      "Combined regression modeling, clustering, and location-based analysis to identify pricing strategies that maximize host revenue.",
+      "Queried and processed 10K+ Airbnb listings with SQL and Python, then built and evaluated regression models in R to predict prices, and presented the findings in interactive Tableau dashboards.",
     highlights: [
-      "Identified optimizations projecting a **25% revenue increase** for underperforming listings.",
-      "Applied **regression, clustering, and geospatial analysis** across listing features.",
-      "Built **interactive Tableau dashboards** for exploring pricing patterns by neighborhood.",
-      "Processed multi-modal data: pricing, reviews, amenities, and **geographic coordinates**.",
+      "Improved **pricing prediction accuracy by 25%** over the baseline with regression models built and evaluated in **R**.",
+      "Queried and processed **10K+ Airbnb listings** using **SQL and Python** for data cleaning, transformation, and exploratory analysis to identify revenue optimization strategies.",
+      "Designed **interactive Tableau dashboards** to visualize trends in pricing, demand, and location-based performance for stakeholders.",
+      "Delivered insights enabling **data-driven pricing strategies** for hosts and property managers.",
     ],
-    tech: ["Python", "R", "SQL", "Tableau", "Machine Learning"],
+    tech: ["R", "Python", "SQL", "Tableau", "Regression"],
   },
   {
     name: "Gold Trading Strategy",
