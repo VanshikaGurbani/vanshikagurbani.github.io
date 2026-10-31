@@ -20,7 +20,7 @@ export function GradientBlobs() {
       />
       <motion.div
         className="absolute top-1/3 -right-10 w-[400px] h-[400px] rounded-full
-                   bg-violet-400/10 dark:bg-violet-400/15 blur-[100px]"
+                   bg-pink-500/10 dark:bg-pink-500/12 blur-[110px]"
         animate={{
           x: [0, -50, 40, 0],
           y: [0, 50, -20, 0],
@@ -30,7 +30,7 @@ export function GradientBlobs() {
       />
       <motion.div
         className="absolute -bottom-20 right-1/4 w-[350px] h-[350px] rounded-full
-                   bg-indigo-500/10 dark:bg-indigo-500/15 blur-[100px]"
+                   bg-cyan-400/8 dark:bg-indigo-500/18 blur-[110px]"
         animate={{
           x: [0, 30, -50, 0],
           y: [0, -30, 20, 0],

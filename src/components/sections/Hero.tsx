@@ -6,6 +6,7 @@ import { siteConfig, socialLinks } from "@/data/portfolio";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 import { Mail, Check } from "lucide-react";
 import { TypewriterText } from "@/components/ui/TypewriterText";
+import { OrbitVisual } from "@/components/ui/OrbitVisual";
 
 export function Hero() {
   const [copied, setCopied] = useState(false);
@@ -17,33 +18,75 @@ export function Hero() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 md:px-10 w-full relative z-10">
-        <div className="max-w-4xl">
+    <section className="relative flex min-h-[88vh] items-center overflow-hidden pb-12 pt-28 md:pt-24">
+      <motion.div
+        aria-hidden="true"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.2, delay: 0.4 }}
+        className="hidden xl:block absolute right-[5%] top-[38%] -translate-y-1/2"
+      >
+        <OrbitVisual />
+      </motion.div>
+
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-10">
+        <div className="max-w-4xl xl:max-w-3xl">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6 inline-flex items-center gap-3 rounded-full border border-border bg-card/60 px-4 py-2 text-xs font-mono uppercase tracking-[0.2em] text-muted backdrop-blur"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-2" />
+            {siteConfig.title}
+          </motion.p>
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
           >
-            <TypewriterText text={siteConfig.headline} speed={35} delay={400} />
+            <TypewriterText
+              text={siteConfig.headline}
+              speed={35}
+              delay={400}
+              className="text-gradient"
+            />
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-xl md:text-2xl text-muted font-light leading-relaxed mb-10 max-w-3xl"
+            className="text-xl md:text-2xl text-muted font-light leading-relaxed mb-8 max-w-3xl"
           >
             {siteConfig.intro}
           </motion.p>
+
+          {/* Availability */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="mb-8 flex flex-col gap-1.5 font-mono text-xs uppercase tracking-[0.2em] md:text-sm"
+          >
+            <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              </span>
+              {siteConfig.status}
+            </div>
+            <p className="pl-[22px] text-muted">{siteConfig.workModes}</p>
+          </motion.div>
 
           {/* Social links + Get in Touch */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-wrap items-center gap-4 mb-10"
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="flex flex-wrap items-center gap-4"
           >
             <a
               href={socialLinks.github}
@@ -99,33 +142,6 @@ export function Hero() {
                 )}
               </AnimatePresence>
             </button>
-          </motion.div>
-
-          {/* Status + Focus areas */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="flex flex-wrap items-center gap-3"
-          >
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              </span>
-              <span className="text-sm font-mono text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                {siteConfig.status}
-              </span>
-            </div>
-            {siteConfig.focusAreas.map((area) => (
-              <span
-                key={area}
-                className="px-4 py-2 rounded-full text-sm font-mono
-                           bg-card border border-border text-muted"
-              >
-                {area}
-              </span>
-            ))}
           </motion.div>
         </div>
       </div>

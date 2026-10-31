@@ -5,13 +5,13 @@
 export const siteConfig = {
   name: "Vanshika Gurbani",
   initials: "VG",
-  title: "AI & Software Engineer",
-  headline: "Engineering intelligence, from research to production",
+  title: "Agentic AI/ML Engineer",
+  headline: "Messy data in, working intelligence out",
   intro:
-    "Hi, I'm Vanshika Gurbani! AI & Software Engineer, MS from Rutgers. I most recently built physics-informed ML systems and digital twins for pharmaceutical manufacturing at Rutgers' Particulate Systems Lab.",
+    "Hi, I'm Vanshika Gurbani, an Agentic AI/ML Engineer with around 2 years of experience. I build agents, ML models, and full-stack products that take messy data and make sense of it, and I'm always trying out the newest AI tools to see what actually works.",
   url: "https://vanshikagurbani.github.io",
-  status: "Open to Opportunities",
-  focusAreas: ["AI/ML", "Data Science", "Full-Stack"],
+  status: "Open to opportunities",
+  workModes: "On-site / Hybrid / Remote",
 };
 
 export const socialLinks = {
@@ -23,7 +23,7 @@ export const socialLinks = {
 export const aboutData = {
   tagline: "Building with purpose",
   bio: [
-    "I'm 24 with an **MS in Statistics - Data Science** from Rutgers, and I most recently worked as an **AI/ML Engineer & Researcher** at the Particulate Systems Lab at Rutgers. I'm here to build intelligent systems that solve real problems, and **I'm just getting started**.",
+    "I'm 24 with an **MS in Statistics - Data Science** from Rutgers, and I'm an **Agentic AI/ML Engineer**. I experiment with new AI tools constantly, and I love building things by taking **messy data** and making sense of it, whether that ends up as an agent, an ML model, or a full product. I most recently worked as an **AI/ML Engineer & Researcher** at the Particulate Systems Lab at Rutgers, and **I'm just getting started**.",
     "I first thought about tech in 8th grade. My **aunt is a Software Engineer**, and one day I asked her what she actually does. She told me how she builds things that quietly make people's lives better, things most people don't even realize are happening behind the scenes. That stuck with me. I didn't know exactly how I'd get there, but I knew I wanted to **use technology to help people**, not in some abstract way, but meaningfully. That curiosity pulled me through **Computer Science** in my bachelor's, into **AI and Data Science** for my master's, and into work that spans **research, engineering, and product**. I've gone from fine-tuning **biomedical NLP models** to building **AI health assistants** to teaching **200+ students** foundational computing.",
     "I did my master's in **Data Science** because I realized Data is how you actually make sense of the world. That same instinct, figure out the problem then build something that solves it, is what drives everything I do.",
   ],
@@ -269,22 +269,6 @@ export const projects: Project[] = [
     github: "https://github.com/VanshikaGurbani/aidevopsagent",
   },
   {
-    name: "NutriPulse",
-    tagline:
-      "Nutrition and fitness tracker that turns plain-English meals into macro breakdowns using two food-data APIs.",
-    description:
-      "Personal project: a Streamlit app where you type meals like \"2 cups white rice with carrots\" and get calories, macros, goals, and insights, with CalorieNinjas for natural-language parsing and USDA FoodData Central as a fallback.",
-    highlights: [
-      "**Dual-API food search**: CalorieNinjas NLP parses quantities and ingredients; the app falls back automatically to the **USDA FoodData Central** database (380K+ foods) when no result is found.",
-      "Wrote a **heuristic relevance scorer** for USDA matches (first-token match, wrong-category penalty, cooked/raw context, calorie sanity cap) to avoid results like \"Bread, oatmeal\" for the query \"oatmeal\".",
-      "Built a 4-tab app with a **TDEE calculator** (Mifflin-St Jeor), A-F **nutrition grade**, exercise tracker with MET-based calorie burn, and **Plotly** radar, donut, and trend charts.",
-      "Deployed on **Streamlit Community Cloud**; API keys kept in environment secrets; CSV export for logs and history.",
-    ],
-    tech: ["Python", "Streamlit", "Plotly", "Pandas", "USDA FoodData Central", "CalorieNinjas API"],
-    github: "https://github.com/VanshikaGurbani/NutriPulse",
-    live: "https://nutripulse.streamlit.app/",
-  },
-  {
     name: "BioNER: Multi-task Biomedical NER",
     tagline:
       "NLP system that tags genes, diseases, and chemicals in biomedical text, comparing single-task and multi-task BioBERT.",
@@ -328,20 +312,6 @@ export const projects: Project[] = [
     ],
     tech: ["Python", "Causal Inference", "EconML", "Scikit-learn", "XGBoost"],
     github: "https://github.com/VanshikaGurbani/growth-mindset-intervention",
-  },
-  {
-    name: "Enhancing Airbnb Revenue: Dynamic Price Modeling",
-    tagline:
-      "Pricing analytics pipeline that models Airbnb listing prices with regression to support data-driven pricing strategies for hosts.",
-    description:
-      "Queried and processed 10K+ Airbnb listings with SQL and Python, then built and evaluated regression models in R to predict prices, and presented the findings in interactive Tableau dashboards.",
-    highlights: [
-      "Improved **pricing prediction accuracy by 25%** over the baseline with regression models built and evaluated in **R**.",
-      "Queried and processed **10K+ Airbnb listings** using **SQL and Python** for data cleaning, transformation, and exploratory analysis to identify revenue optimization strategies.",
-      "Designed **interactive Tableau dashboards** to visualize trends in pricing, demand, and location-based performance for stakeholders.",
-      "Delivered insights enabling **data-driven pricing strategies** for hosts and property managers.",
-    ],
-    tech: ["R", "Python", "SQL", "Tableau", "Regression"],
   },
   {
     name: "Gold Trading Strategy",
@@ -463,6 +433,20 @@ export const projects: Project[] = [
     ],
     tech: ["Python", "XGBoost", "Random Forest", "Prophet", "SHAP", "Causal Inference"],
     github: "https://github.com/VanshikaGurbani/rossmann_forecasting",
+  },
+  {
+    name: "Enhancing Airbnb Revenue: Dynamic Price Modeling",
+    tagline:
+      "Pricing analytics pipeline that models Airbnb listing prices with regression to support data-driven pricing strategies for hosts.",
+    description:
+      "Queried and processed 10K+ Airbnb listings with SQL and Python, then built and evaluated regression models in R to predict prices, and presented the findings in interactive Tableau dashboards.",
+    highlights: [
+      "Improved **pricing prediction accuracy by 25%** over the baseline with regression models built and evaluated in **R**.",
+      "Queried and processed **10K+ Airbnb listings** using **SQL and Python** for data cleaning, transformation, and exploratory analysis to identify revenue optimization strategies.",
+      "Designed **interactive Tableau dashboards** to visualize trends in pricing, demand, and location-based performance for stakeholders.",
+      "Delivered insights enabling **data-driven pricing strategies** for hosts and property managers.",
+    ],
+    tech: ["R", "Python", "SQL", "Tableau", "Regression"],
   },
 ];
 

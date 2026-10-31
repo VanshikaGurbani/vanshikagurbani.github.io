@@ -4,6 +4,8 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { GradientBlobs } from "@/components/ui/GradientBlobs";
+import { StarField } from "@/components/ui/StarField";
+import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import "./globals.css";
 
 const inter = Inter({
@@ -12,13 +14,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Vanshika Gurbani | AI Engineer & Data Scientist",
+  title: "Vanshika Gurbani | Agentic AI/ML Engineer",
   description:
-    "Graduate Data Scientist passionate about solving problems using Machine Learning, NLP, and intelligent systems. Portfolio showcasing projects in ML, NLP, causal inference, and analytics.",
+    "Agentic AI/ML Engineer who builds agents, ML models, and full-stack products that make sense of messy data. Portfolio of projects in agentic AI, NLP, causal inference, and analytics.",
   openGraph: {
-    title: "Vanshika Gurbani | AI Engineer & Data Scientist",
+    title: "Vanshika Gurbani | Agentic AI/ML Engineer",
     description:
-      "Graduate Data Scientist passionate about Machine Learning, NLP, and intelligent systems.",
+      "Agentic AI/ML Engineer building agents, ML models, and products that make sense of messy data.",
     url: "https://vanshikagurbani.github.io",
     type: "website",
   },
@@ -37,6 +39,8 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>
           <GradientBlobs />
+          <StarField />
+          <ScrollProgress />
           <Navbar />
           <main className="flex-1 relative z-10">{children}</main>
           <Footer />
