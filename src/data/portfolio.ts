@@ -284,16 +284,17 @@ export const projects: Project[] = [
   {
     name: "BioNER: Multi-task Biomedical NER",
     tagline:
-      "NLP system that tags genes, diseases, and chemicals in biomedical text, comparing single-task and multi-task BioBERT.",
+      "A model that reads medical research text and highlights the genes, diseases and chemicals it mentions, the first step in organising what thousands of papers say (a task called named entity recognition, or NER).",
     description:
-      "M.S. thesis project. Fine-tuned BioBERT v1.1 as a token-level tagger on 5 biomedical benchmark corpora and compared single-task learning against a multi-task model with a shared encoder and per-dataset heads.",
+      "M.S. thesis project. I fine-tuned BioBERT, an AI language model already trained on biomedical papers, to label every word of a sentence as part of a gene, chemical, disease or none of these. I trained it on five public benchmark datasets and compared training separately on each dataset (single-task) with multi-task training across all five, which is meant to let the datasets help each other.",
     highlights: [
-      "Benchmarked across **5 corpora** (BC2GM, BC4CHEMD, BC5CDR, JNLPBA, NCBI Disease) using **IOBES tagging**; fine-tuned for 3 epochs (learning rate 5e-5, batch size 8).",
-      "Single-task **token-level macro-F1 across IOBES tags** (including the non-entity class): **0.93** BC4CHEMD, **0.91** NCBI Disease, **0.88** BC2GM, **0.86** BC5CDR, **0.71** JNLPBA; overall token accuracy of 0.93 to 0.99 is inflated by the majority non-entity class.",
-      "The **multi-task model matched or slightly trailed** single-task (for example BC2GM macro-F1 0.86 vs 0.88, a gap of 0.00 to 0.02 across datasets), at higher GPU and training cost.",
-      "Engineered preprocessing with **word-piece token alignment** to IOBES labels and **dynamic batching**, and handled heavy class imbalance (most tokens are non-entity).",
+      "**How the labelling works.** Each word gets a tag such as \"start of a chemical\" or \"not an entity\" (the **IOBES** scheme). BioBERT splits rare words into smaller pieces, so I wrote code to line the tags up with those pieces. Most words are not entities, so the data is heavily imbalanced.",
+      "**Five datasets:** BC2GM (genes), BC4CHEMD (chemicals), BC5CDR (chemicals and diseases), JNLPBA (proteins and genes) and NCBI Disease (diseases).",
+      "**Results.** Scored by **macro-F1**, an average across tag types that counts rare tags as much as common ones (1.0 is perfect). Single-task reached **0.93** on BC4CHEMD, **0.91** on NCBI Disease, **0.88** on BC2GM, **0.86** on BC5CDR and **0.71** on JNLPBA, the hardest dataset. Plain accuracy (0.93 to 0.99) looks better but is inflated because most words are not entities.",
+      "**Multi-task did not beat single-task.** It matched or trailed by 0.00 to 0.02 macro-F1 on every dataset (for example 0.86 against 0.88 on BC2GM) and cost more GPU time. A plausible cause, which I did not test, is that the largest dataset (BC4CHEMD) dominates what the model learns.",
+      "**Honest limits.** These are per-word scores, not whole-name (entity-level) scores. The benchmark test sets were also used to monitor training, because there was no separate validation split, so the numbers may be slightly optimistic.",
     ],
-    tech: ["PyTorch", "BioBERT", "HuggingFace", "Multi-task Learning"],
+    tech: ["PyTorch", "BioBERT", "HuggingFace Transformers", "scikit-learn", "Multi-task Learning"],
     github: "https://github.com/VanshikaGurbani/Multi-BIONER",
   },
   {
