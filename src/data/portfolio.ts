@@ -24,7 +24,7 @@ export const aboutData = {
   tagline: "Building with purpose",
   bio: [
     "I'm 24 with an **MS in Statistics - Data Science** from Rutgers, and I'm an **Agentic AI/ML Engineer**. I experiment with new AI tools constantly, and I love building things by taking **messy data** and making sense of it, whether that ends up as an agent, an ML model, or a full product. I most recently worked as an **AI/ML Engineer & Researcher** at the Particulate Systems Lab at Rutgers, and **I'm just getting started**.",
-    "I first thought about tech in 8th grade. My **aunt is a Software Engineer**, and one day I asked her what she actually does. She told me how she builds things that quietly make people's lives better, things most people don't even realize are happening behind the scenes. That stuck with me. I didn't know exactly how I'd get there, but I knew I wanted to **use technology to help people**, not in some abstract way, but meaningfully. That curiosity pulled me through **Computer Science** in my bachelor's, into **AI and Data Science** for my master's, and into work that spans **research, engineering, and product**. I've gone from fine-tuning **biomedical NLP models** to building **AI health assistants** to teaching **200+ students** foundational computing.",
+    "I first thought about tech in 8th grade. My **aunt is a Software Engineer**, and one day I asked her what she actually does. She told me how she builds things that quietly make people's lives better, things most people don't even realize are happening behind the scenes. That stuck with me. I didn't know exactly how I'd get there, but I knew I wanted to **use technology to help people**, not in some abstract way, but meaningfully. That curiosity pulled me through **Computer Engineering** in my bachelor's, into **AI and Data Science** for my master's, and into work that spans **research, engineering, and product**. I've gone from fine-tuning **biomedical NLP models** to building **AI health assistants** to teaching **200+ students** foundational computing.",
     "I did my master's in **Data Science** because I realized Data is how you actually make sense of the world. That same instinct, figure out the problem then build something that solves it, is what drives everything I do.",
   ],
   philosophy: [
@@ -226,21 +226,22 @@ export const projects: Project[] = [
   {
     name: "SourceMD",
     tagline:
-      "AI-powered medical fact-checker that scores every claim in an AI answer against real clinical guidelines.",
+      "AI chatbots can sound sure while getting medical facts wrong, so SourceMD checks every claim in an AI answer against real clinical guidelines and gives the answer a trust score from 0 to 100.",
     description:
-      "AI-powered medical fact-checker that breaks any AI-generated answer into atomic claims, verifies each against real clinical guidelines (NICE, AHA), and returns a trust score, hallucination rate, and corrected source-backed rewrite.",
+      "Paste a medical question and an AI's answer. SourceMD splits the answer into single factual claims, looks each one up in four official guideline documents (from NICE, the UK's national health guidance body, and the American Heart Association), and marks it supported, unsupported (the guidelines say nothing about it) or contradicted. It then writes a corrected version of the answer with sources you can click.",
     highlights: [
-      "**3-node LangGraph pipeline** (Claim Extractor, Retriever, Scorer) over **~844 guideline chunks** from NICE NG28, NG136, CG181, and AHA 2025 CPR; embeddings via **all-MiniLM-L6-v2** with cosine similarity search in **ChromaDB**.",
-      "**Live web augmentation** via Tavily API fires when corpus similarity falls below 0.35, pulling from NIH, WHO, PubMed, Mayo Clinic, and NICE; results shown with a live web badge alongside guideline citations.",
-      "Per-claim **SUPPORTED / UNSUPPORTED / CONTRADICTED verdicts** with rationale and page-level citations; aggregated into a **trust score (0-100)**, **hallucination rate %**, and **source coverage %**, all computed directly from pipeline output.",
-      "**Corrected answer** rewrite grounded in retrieved passages with clickable citations; **multi-turn follow-up chat** persisted per evaluation and shareable by URL with no account required.",
-      "Cut peak memory by **45%** by replacing PyTorch-based SentenceTransformers with **ONNX-quantized FastEmbed** embeddings (same all-MiniLM-L6-v2 model), so the backend fits Render's **512 MB** free tier.",
-      "Full-stack: **FastAPI + SQLAlchemy** backend deployed across **Render** and **Neon serverless PostgreSQL**, **React 18 + TypeScript + Tailwind** frontend on **Vercel**, with health checks, automatic restarts, and push-to-deploy continuous deployment; evaluation history sidebar with rename and delete.",
+      "**How it checks.** A 3-step pipeline built with **LangGraph** (a tool for chaining AI steps): pull out each claim, retrieve the closest guideline passages, then have an AI model (Groq's **gpt-oss-120b**) judge each claim against them. Retrieval means searching about **844 guideline passages** by meaning rather than exact words, using **ChromaDB**, a database built for that kind of search.",
+      "**Web backup.** When the guidelines have nothing close to a claim, it searches trusted medical sites (NIH, WHO, PubMed and others) through the **Tavily** search API and labels those sources as live web.",
+      "**Trust score.** Each verdict is weighted by how confident the AI is and combined into a **0 to 100 score**, shown next to the corrected answer and page-level citations. A flagged-claim rate (the share of claims not marked supported) is a warning signal, not an accuracy score.",
+      "**Result: looking things up helped.** On **57 held-out test claims** (claims I did not use while tuning), the verdict was right **83%** of the time when the AI could consult the guidelines, against **61%** when it judged from memory alone. The trust score ranked fully supported answers above flawed ones with an AUROC of **0.98** across 20 test answers (1.0 would be a perfect ranking).",
+      "**Tested, not assumed.** Adding live web search scored 81%, and a hybrid of keyword and meaning search scored 86% but found fewer contradicted claims (65% against 76%), so I left it off. When the AI quotes a guideline, the quote really appears in the passage it cites **95%** of the time.",
+      "**Lighter to run.** Swapping the embedding step (the part that turns text into numbers so it can be searched by meaning) from PyTorch to **ONNX**, a leaner runtime, via **FastEmbed** cut peak memory **53%** (526 MB to 247 MB in a Linux container), so the backend runs on Render's free 512 MB tier. **90 automated tests**, lint, type checks and a build run on every change in **GitHub Actions**; the stack is **FastAPI**, **Neon PostgreSQL** and a **React + TypeScript** frontend on Vercel.",
+      "**Honest limits.** The test set is small, so differences of a few points are noise. I wrote the claims from the guideline text itself, so they are cleaner than real chatbot output and the accuracy is probably optimistic; the labels were cross-checked by AI, not reviewed by a clinician. It checks against four guidelines only, and pulling claims out of an answer was not part of this test. On the live demo, the first request after idle can take 30 to 60 seconds while the free server wakes up.",
     ],
     tech: [
       "LangGraph",
-      "LLaMA 3.3 70B (Groq)",
-      "Claude API (fallback)",
+      "Groq gpt-oss-120b",
+      "Claude API (optional failover)",
       "ChromaDB",
       "FastEmbed (ONNX)",
       "Tavily",
@@ -249,6 +250,7 @@ export const projects: Project[] = [
       "React",
       "TypeScript",
       "Tailwind CSS",
+      "GitHub Actions",
     ],
     github: "https://github.com/VanshikaGurbani/SourceMD",
     live: "https://source-md.vercel.app",
@@ -256,16 +258,27 @@ export const projects: Project[] = [
   {
     name: "AI DevOps Agent",
     tagline:
-      "Autonomous DevOps agent that monitors live Vercel deployments, detects failures, and opens GitHub PRs with fixes. Built at Zero to Agent, a Cerebral Valley, Vercel, and Google DeepMind hackathon.",
+      "A hackathon team project: an AI assistant for the engineers who keep websites running. It watches deployments on Vercel, flags failures, and on request finds the likely cause and opens a draft fix for a person to review.",
     description:
-      "Built an AI-powered DevOps agent that monitors production deployments in real time, scans for failures and security issues, and autonomously generates and opens GitHub pull requests with fixes. Integrated with Slack for operator-facing slash commands.",
+      "A deployment is one release of a website to the internet, and Vercel is the service that hosts it. A daily check records failed deployments and unreachable sites as incidents and alerts the team in Slack. When someone asks, in Slack or the dashboard chat, the agent (powered by Google's Gemini 3 Flash model) works out the likely cause and opens a draft pull request, a proposed code change that a person must approve before it goes live.",
     highlights: [
-      "**Recursive detect-diagnose-fix loop** over live deployments: Vercel webhooks surface build failures, runtime errors, and security vulnerabilities in real time and trigger the fix pipeline without human intervention.",
-      "**Autonomous PR generation** using the GitHub API: the agent diagnoses the root cause, writes a patch, and opens a pull request with a structured description ready for review.",
-      "**Slack integration** with slash commands for rollbacks, incident queries, and system status checks, giving teams a natural language interface to the agent.",
-      "Powered by **Gemini 3 Flash** via the Vercel AI SDK for diagnosis and code generation; **Supabase** for persisting incident history and deployment state.",
+      "**Team project, built in 8 hours.** I co-built it with Ronit Gandhi at **Zero to Agent**, the Vercel x Google DeepMind hackathon. The safety rules, tests and bug fixes below are work I added afterwards.",
+      "**Detect, diagnose, fix.** A scheduled job (a task that runs on a timer) runs once a day, finds new failed deployments and websites that stopped responding, records each as an incident and posts one Slack alert per failure. Asked to investigate, the agent reads logs and code through the Vercel and GitHub APIs and opens a pull request with a fix. The daily job alone never changes any code.",
+      "**Slack control.** Plain-English **/devops** commands roll a project back to its last working version, list open incidents, check deployment status or compare settings between two projects. **Supabase**, a hosted database, keeps the incident history, and a weekly summary posts to Slack every Saturday.",
+      "**Safety first, because it acts on real systems.** Its pull requests open as drafts so a person has to approve them. It cannot commit straight to the main branch, cannot edit secret or CI files, refuses a change that looks like it contains a password or key (a pattern check, not a guarantee), and has a dry-run mode that reports what it would do without doing it.",
+      "**Checked on every change.** I added automated tests for the safety rules, the cron security and the monitor, plus a GitHub Actions workflow that runs a type check, the tests and a build. Along the way I fixed uptime incidents the database was rejecting, a cron endpoint that accepted requests when its secret was not set, and a deploy script that printed secret values to the terminal.",
+      "**Honest limits.** The repository has no measured numbers for how often the agent's fixes are correct, so I do not quote any. The monitor runs once a day because Vercel's free plan only allows daily scheduled jobs.",
     ],
-    tech: ["Next.js", "Vercel AI SDK", "Gemini 3 Flash", "Supabase", "GitHub API", "Slack"],
+    tech: [
+      "Next.js",
+      "Vercel AI SDK",
+      "Gemini 3 Flash",
+      "Supabase",
+      "GitHub API",
+      "Slack",
+      "Vitest",
+      "GitHub Actions",
+    ],
     github: "https://github.com/VanshikaGurbani/aidevopsagent",
   },
   {
@@ -407,17 +420,30 @@ export const projects: Project[] = [
   {
     name: "Job Postings Insights",
     tagline:
-      "NLP pipeline that turns messy job postings into structured skills, salary, and remote-work insights.",
+      "A study of about 124,000 LinkedIn job postings that shows which skills employers ask for, what the jobs pay, and which companies have sponsored H-1B work visas before, built to help job seekers decide what to learn and where to apply.",
     description:
-      "Extracted skills, salary ranges, and remote availability from real-world job postings, then clustered jobs by skill similarity with sentence embeddings and visualized the results.",
+      "Job postings are messy free text, so the first step is turning each one into structured facts: skills, pay and whether the job is remote. The project then groups postings with similar skill lists, trains a model to estimate pay, and matches company names to public US government records (USCIS) of approved H-1B petitions, the work visa many employers use for foreign professionals. Everything is explorable in a live web app.",
     highlights: [
-      "Worked from a **123,849-record** US job postings dataset, prototyping the pipeline on a **200-row sample**.",
-      "**Sentence embeddings (all-MiniLM-L6-v2)** with **KMeans** clustering and **UMAP** projections to group jobs by skill profile.",
-      "Surfaced top in-demand skills, locations, and remote vs. on-site splits; **higher salaries aligned with cloud and AI skill clusters**.",
-      "Organized as five notebooks from **EDA and cleaning** through **embedding, clustering, and visualization**.",
+      "**Reading the postings.** Rules written for this project pull out skills (from a list of about 100), pay (converted to a yearly US dollar figure) and remote, hybrid or on-site status. The original version matched skills by simple text search and tagged **100%** of postings with the programming language \"R\"; the new rules do this for **0.5%**. One command rebuilds every result from the raw file, and tests and lint run in **GitHub Actions**.",
+      "**Skill detection about 36% better.** On 40 postings with reference answers, the new rules scored an F1 of **0.64** against **0.47** for the original method on the same 18-skill list (F1 balances finding real skills against adding false ones), and **0.73** on the full skill list. A small free AI model (Qwen2.5-1.5B) running on a laptop processor scored lower, 0.42.",
+      "**Pay estimates 43% closer.** Using the **50,700** postings that state pay, a ridge regression model (a simple, stable way of fitting a line to data) was off by **$24,613** on average, against **$43,075** for guessing the overall median salary: 43% less error. Against a smarter baseline, the median for the same role and experience level ($35,198), it is 30% less. It was tested on job titles it had never seen, and a gradient boosting model did about the same.",
+      "**20 stable skill groups.** The **75,576** postings with at least two hard skills are grouped by skill overlap into 20 clusters, for example one led by Python, SQL and Java where 59% of titles are data, software or AI roles. Re-running with five different random starting points gave nearly the same groups (agreement 0.80 out of 1), and the groups are more distinct than the original method's (0.27 against 0.10 on a standard separation measure, though the two scores are not strictly comparable).",
+      "**H-1B employer flags.** Company names are matched to public USCIS filings for 2021 to 2023: **42.6%** of postings matched a company, and a spot check of 40 matches found the same company every time. A match shows a company has sponsored before, not that a particular job will.",
+      "**What it found.** After adjusting for role, seniority and work arrangement, postings that list TypeScript (+16%), Generative AI (+15%), Machine Learning (+13%) or Go (+12%) are associated with higher pay. Remote pay is not clearly different (+6.3%, with a range from -2.7% to +21.2%). These come from the 3,428 data, AI and software postings that state a salary and show association, not proof that learning a skill raises pay.",
+      "**Honest limits.** The 40-posting test set is small and was labelled in a single pass, so the scores have wide margins of error. The rule that spots sponsorship-friendly wording was right 64% of the time, so treat it as a rough filter. The data covers about three weeks of spring 2024, so it says nothing about trends over time, and it is not legal or immigration advice. The free live app sleeps when idle, so the first load can take a few seconds.",
     ],
-    tech: ["Python", "Sentence-Transformers", "scikit-learn", "UMAP", "NLP", "pandas"],
+    tech: [
+      "Python",
+      "pandas",
+      "scikit-learn",
+      "Ridge & Gradient Boosting",
+      "Hugging Face Transformers",
+      "Streamlit",
+      "Plotly",
+      "GitHub Actions",
+    ],
     github: "https://github.com/VanshikaGurbani/Job_Postings_Insights",
+    live: "https://jobpostingsinsights.streamlit.app/",
   },
   {
     name: "Rossmann Sales Forecasting",
@@ -469,7 +495,7 @@ export const education: Education[] = [
   },
   {
     school: "University of Mumbai",
-    degree: "B.E. in Computer Science",
+    degree: "B.E. in Computer Engineering",
     duration: "Aug 2019 - May 2023",
     gpa: "8.5 / 10.0",
     coursework:

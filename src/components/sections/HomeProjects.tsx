@@ -2,10 +2,16 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { SectionWrapper } from "@/components/ui/SectionWrapper";
-import { allProjects } from "@/data/projects";
+import { getProjectBySlug } from "@/data/projects";
+
+const FEATURED_SLUGS = ["sourcemd", "ai-devops-agent", "bioner", "job-postings-insights"];
 
 export function HomeProjects() {
-  const [featured, ...rest] = allProjects.slice(0, 4);
+  const [featured, ...rest] = FEATURED_SLUGS.map((slug) => {
+    const project = getProjectBySlug(slug);
+    if (!project) throw new Error(`Missing featured project "${slug}"`);
+    return project;
+  });
 
   return (
     <SectionWrapper className="py-16 md:py-24">
