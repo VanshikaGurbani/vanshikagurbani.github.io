@@ -14,15 +14,16 @@ export function Navbar() {
   const pathname = usePathname();
 
   function isActive(href: string) {
-    return pathname === href || pathname === href.replace(/\/$/, "");
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href);
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50">
-      <nav className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/20 backdrop-blur-xl md:bg-background/80">
+      <nav className="mx-auto flex h-[72px] max-w-7xl items-center justify-end px-6 md:h-16 md:justify-between md:px-10">
         <Link
           href="/"
-          className="text-xl font-mono uppercase tracking-wider text-muted hover:text-foreground transition-colors"
+          className="hidden text-xl font-mono uppercase tracking-wider text-muted transition-colors hover:text-foreground md:block"
         >
           {siteConfig.initials}
         </Link>
@@ -54,11 +55,11 @@ export function Navbar() {
         </div>
 
         {/* Mobile toggle */}
-        <div className="flex md:hidden items-center gap-2">
-          <ThemeToggle />
+        <div className="flex md:hidden items-center gap-3">
+          <ThemeToggle boxed />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-foreground/5"
+            className="flex h-11 w-11 items-center justify-center rounded-md border border-border bg-card/40 transition-colors hover:border-accent/50"
             aria-label="Toggle menu"
           >
             {mobileOpen ? (
@@ -72,7 +73,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl">
+        <div className="md:hidden border-t border-border/50 bg-background/80 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-6 md:px-10 py-4 flex flex-col gap-4">
             {navLinks.map((link) => (
               <Link
