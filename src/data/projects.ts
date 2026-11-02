@@ -48,14 +48,14 @@ const metaByName: Record<string, ProjectMeta> = {
     slug: "bioner",
     shortName: "BioNER",
     category: "AI Research",
-    metric: "5 datasets · per-word macro-F1 0.71 to 0.93 · rebuilt with a real shared-encoder model",
+    metric: "5 datasets · 85.4 average F1 with separate models · one shared model within 0.2 points",
     flow: ["TEXT", "BIOBERT", ["SINGLE", "MULTI"], "ENTITIES"],
     active: 2,
     stats: [
       { value: "5", label: "Biomedical datasets" },
-      { value: "0.93", label: "Best macro-F1 (BC4CHEMD, chemicals)" },
-      { value: "0.71", label: "Lowest macro-F1 (JNLPBA, hardest dataset)" },
-      { value: "1 encoder", label: "Shared by all five datasets in the rebuild (the original run used five separate models)" },
+      { value: "85.4", label: "Average whole-name F1 across the five datasets (3 seeds)" },
+      { value: "75.4", label: "Lowest F1 (JNLPBA, the hardest dataset)" },
+      { value: "0.2 pts", label: "Average F1 given up by one shared model instead of five" },
     ],
   },
   "True Image Caption Generator": {
