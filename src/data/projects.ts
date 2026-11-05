@@ -149,16 +149,18 @@ const metaByName: Record<string, ProjectMeta> = {
       { value: "Gemini", label: "Cover letters and match scoring" },
     ],
   },
-  "Personalized Movie Recommender": {
-    slug: "movie-recommender",
-    shortName: "Movie Recommender",
+  "H&M Fashion Recommender": {
+    slug: "hm-fashion-recommender",
+    shortName: "Fashion Recommender",
     category: "Applied AI",
-    metric: "MovieLens · mood + personality scoring · Cohere explanations",
-    flow: ["PROFILE", "SCORING", "COHERE", "PICKS"],
-    active: 1,
+    metric: "Score 0.033 vs 0.027 for the best simple rule · 5,726 shoppers · live demo",
+    flow: ["HISTORY", "SHORTLIST", "RANKER", "TOP 12"],
+    active: 2,
     stats: [
-      { value: "6", label: "Question personality quiz" },
-      { value: "MovieLens", label: "Dataset" },
+      { value: "0.033", label: "Score (MAP@12) vs 0.027 for \"suggest what they bought before\"" },
+      { value: "+0.006", label: "Gain over that rule, 95% range +0.004 to +0.008" },
+      { value: "~160", label: "Items shortlisted per shopper (finds 16% of what they buy)" },
+      { value: "22 ms", label: "Median time for one fresh recommendation" },
     ],
   },
   "Job Postings Insights": {

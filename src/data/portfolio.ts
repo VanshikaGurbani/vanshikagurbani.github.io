@@ -406,19 +406,23 @@ export const projects: Project[] = [
     github: "https://github.com/VanshikaGurbani/job-automation-agent-app",
   },
   {
-    name: "Personalized Movie Recommender",
+    name: "H&M Fashion Recommender",
     tagline:
-      "Movie recommender that adapts to your personality, mood, and viewing history, with LLM-powered search.",
+      "The \"you might also like\" row of an online clothing shop: for each shopper it picks the 12 items they are most likely to buy next week out of more than 100,000 H&M products, and explains each pick in plain words.",
     description:
-      "Streamlit recommender built on the MovieLens dataset that scores movies on genre, mood, personality, and history, and explains each recommendation with Cohere.",
+      "An independent project built on H&M purchase data from a Kaggle competition (31.8 million purchases, 105,000 products, 1.37 million customers). A fast first step shortlists about 160 items per shopper, and a learned ranking model then sorts the shortlist. I measured it by replaying real shopping weeks it had never seen, and it beats the strongest simple rule by a margin that is unlikely to be luck. It has a live demo app and an API, and it is not made by or affiliated with H&M.",
     highlights: [
-      "**Multi-factor scoring** combining genre match, mood filter, personality filter, history bonus, and controlled randomness for diverse results.",
-      "**Six-question personality assessment** and persistent user profile and history that improve recommendations over time.",
-      "**Natural language search** and **AI explanations** for each pick using **Cohere**.",
-      "Built on **MovieLens** data with a dark-themed interactive **Streamlit** UI.",
+      "**How it works.** Two steps. First, six quick \"scouts\" build a shortlist of about 160 items per shopper: things they bought before, what is trending this week, what people of the same age buy, items often bought together, items liked by shoppers with similar taste (a method called **ALS**), and a small neural network (a **two-tower model**) that matches the style of recent purchases. Second, a learned ranking model (**LightGBM LambdaRank**) reads 44 clues per shopper and item, such as how often the shopper buys this kind of product, how popular the item is and how its price compares with what they usually spend, and puts the likeliest 12 first.",
+      "**How it was tested.** It is a replay of real life: the system only sees purchases up to a certain day, then its 12 suggestions are compared with what shoppers actually bought in the following 7 days. The last 7 days are the test, the 7 days before train the ranking model, older purchases are history, and automated tests check that nothing from the future leaks in. The score is **MAP@12**, which runs from 0 to 1 and is higher when the items a shopper really bought sit nearer the top of the 12 suggestions. It was measured on 5,726 shoppers from a random 10% sample of customers (136,228 people). Scores look small because shoppers buy only a few of 100,000+ products in a week.",
+      "**Results.** The full system scored **0.033** (95% confidence range 0.030 to 0.037) against **0.027** for the strongest simple rule, \"suggest what they bought before\" (range 0.024 to 0.031). The gain of **+0.006** is statistically reliable: its 95% confidence range is +0.004 to +0.008. Other simple rules scored far lower, about 0.009 for ALS, 0.008 for \"most popular\" and \"popular for your age\", and 0.007 for \"often bought together\".",
+      "**What helped and what did not.** Dropping the item clues cost 0.003 and dropping the shopper-and-item clues cost 0.002, both reliably. A text-understanding model that reads product descriptions added nothing detectable (a change of 0.0003, well inside the noise). The shortlist finds only about 16% of what shoppers go on to buy, which caps what the ranker can do, so better scouts are the biggest opportunity.",
+      "**A variety slider.** The demo lets you trade accuracy for variety using a re-ordering method called **MMR**. At the strongest setting I tested, the score drops from 0.0333 to 0.0307 while category variety rises from 0.63 to 0.69.",
+      "**Built as a working product.** Every suggestion carries a one-line reason built from the purchase records (for example \"you bought it 2 times, last 14 days ago\"), never invented. There is a live **Streamlit** demo, a **FastAPI** endpoint that returns a fresh recommendation in about 22 milliseconds (median, one machine), a **Docker** image, 48 automated tests and automatic checks on every change. H&M's data cannot be shared publicly, so the live demo runs on made-up sample shoppers while its charts and scores come from the real-data measurements.",
+      "**Honest limits.** Results come from a 10% sample of customers, so they cannot be compared with the public Kaggle leaderboard. The test replays past purchases, so it shows how well the system predicts what shoppers bought, not what they would have bought if shown something else. Shoppers with no earlier purchases are left out of the headline score. The ranking model was lightly tuned on one validation week and trained with one random seed.",
     ],
-    tech: ["Python", "Streamlit", "Cohere", "pandas", "MovieLens"],
-    github: "https://github.com/VanshikaGurbani/recommender-system",
+    tech: ["Python", "LightGBM", "FAISS", "PyTorch", "FastAPI", "Streamlit", "Docker", "GitHub Actions"],
+    github: "https://github.com/VanshikaGurbani/hm-two-stage-recommender",
+    live: "https://fashion-recommendersystem.streamlit.app/",
   },
   {
     name: "Job Postings Insights",
