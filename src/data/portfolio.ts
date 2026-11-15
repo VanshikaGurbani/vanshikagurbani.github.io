@@ -212,6 +212,14 @@ export const experiences: Experience[] = [
   },
 ];
 
+export interface ProjectFigure {
+  src: string;
+  alt: string;
+  caption: string;
+  width: number;
+  height: number;
+}
+
 export interface Project {
   name: string;
   tagline: string;
@@ -220,6 +228,7 @@ export interface Project {
   tech: string[];
   github?: string;
   live?: string;
+  figures?: ProjectFigure[];
 }
 
 export const projects: Project[] = [
@@ -256,30 +265,23 @@ export const projects: Project[] = [
     live: "https://source-md.vercel.app",
   },
   {
-    name: "AI DevOps Agent",
+    name: "H&M Fashion Recommender",
     tagline:
-      "A hackathon team project: an AI assistant for the engineers who keep websites running. It watches deployments on Vercel, flags failures, and on request finds the likely cause and opens a draft fix for a person to review.",
+      "The \"you might also like\" row of an online clothing shop: for each shopper it picks the 12 items they are most likely to buy next week out of more than 100,000 H&M products, and explains each pick in plain words.",
     description:
-      "A deployment is one release of a website to the internet, and Vercel is the service that hosts it. A daily check records failed deployments and unreachable sites as incidents and alerts the team in Slack. When someone asks, in Slack or the dashboard chat, the agent (powered by Google's Gemini 3 Flash model) works out the likely cause and opens a draft pull request, a proposed code change that a person must approve before it goes live.",
+      "An independent project built on H&M purchase data from a Kaggle competition (31.8 million purchases, 105,000 products, 1.37 million customers). A fast first step shortlists about 160 items per shopper, and a learned ranking model then sorts the shortlist. I measured it by replaying real shopping weeks it had never seen, and it beats the strongest simple rule by a margin that is unlikely to be luck. It has a live demo app and an API, and it is not made by or affiliated with H&M.",
     highlights: [
-      "**Team project, built in 8 hours.** I co-built it with Ronit Gandhi at **Zero to Agent**, the Vercel x Google DeepMind hackathon. The safety rules, tests and bug fixes below are work I added afterwards.",
-      "**Detect, diagnose, fix.** A scheduled job (a task that runs on a timer) runs once a day, finds new failed deployments and websites that stopped responding, records each as an incident and posts one Slack alert per failure. Asked to investigate, the agent reads logs and code through the Vercel and GitHub APIs and opens a pull request with a fix. The daily job alone never changes any code.",
-      "**Slack control.** Plain-English **/devops** commands roll a project back to its last working version, list open incidents, check deployment status or compare settings between two projects. **Supabase**, a hosted database, keeps the incident history, and a weekly summary posts to Slack every Saturday.",
-      "**Safety first, because it acts on real systems.** Its pull requests open as drafts so a person has to approve them. It cannot commit straight to the main branch, cannot edit secret or CI files, refuses a change that looks like it contains a password or key (a pattern check, not a guarantee), and has a dry-run mode that reports what it would do without doing it.",
-      "**Checked on every change.** I added automated tests for the safety rules, the cron security and the monitor, plus a GitHub Actions workflow that runs a type check, the tests and a build. Along the way I fixed uptime incidents the database was rejecting, a cron endpoint that accepted requests when its secret was not set, and a deploy script that printed secret values to the terminal.",
-      "**Honest limits.** The repository has no measured numbers for how often the agent's fixes are correct, so I do not quote any. The monitor runs once a day because Vercel's free plan only allows daily scheduled jobs.",
+      "**How it works.** Two steps. First, six quick \"scouts\" build a shortlist of about 160 items per shopper: things they bought before, what is trending this week, what people of the same age buy, items often bought together, items liked by shoppers with similar taste (a method called **ALS**), and a small neural network (a **two-tower model**) that matches the style of recent purchases. Second, a learned ranking model (**LightGBM LambdaRank**) reads 44 clues per shopper and item, such as how often the shopper buys this kind of product, how popular the item is and how its price compares with what they usually spend, and puts the likeliest 12 first.",
+      "**How it was tested.** It is a replay of real life: the system only sees purchases up to a certain day, then its 12 suggestions are compared with what shoppers actually bought in the following 7 days. The last 7 days are the test, the 7 days before train the ranking model, older purchases are history, and automated tests check that nothing from the future leaks in. The score is **MAP@12**, which runs from 0 to 1 and is higher when the items a shopper really bought sit nearer the top of the 12 suggestions. It was measured on 5,726 shoppers from a random 10% sample of customers (136,228 people). Scores look small because shoppers buy only a few of 100,000+ products in a week.",
+      "**Results.** The full system scored **0.033** (95% confidence range 0.030 to 0.037) against **0.027** for the strongest simple rule, \"suggest what they bought before\" (range 0.024 to 0.031). The gain of **+0.006** is statistically reliable: its 95% confidence range is +0.004 to +0.008. Other simple rules scored far lower, about 0.009 for ALS, 0.008 for \"most popular\" and \"popular for your age\", and 0.007 for \"often bought together\".",
+      "**What helped and what did not.** Dropping the item clues cost 0.003 and dropping the shopper-and-item clues cost 0.002, both reliably. A text-understanding model that reads product descriptions added nothing detectable (a change of 0.0003, well inside the noise). The shortlist finds only about 16% of what shoppers go on to buy, which caps what the ranker can do, so better scouts are the biggest opportunity.",
+      "**A variety slider.** The demo lets you trade accuracy for variety using a re-ordering method called **MMR**. At the strongest setting I tested, the score drops from 0.0333 to 0.0307 while category variety rises from 0.63 to 0.69.",
+      "**Built as a working product.** Every suggestion carries a one-line reason built from the purchase records (for example \"you bought it 2 times, last 14 days ago\"), never invented. There is a live **Streamlit** demo, a **FastAPI** endpoint that returns a fresh recommendation in about 22 milliseconds (median, one machine), a **Docker** image, 48 automated tests and automatic checks on every change. H&M's data cannot be shared publicly, so the live demo runs on made-up sample shoppers while its charts and scores come from the real-data measurements.",
+      "**Honest limits.** Results come from a 10% sample of customers, so they cannot be compared with the public Kaggle leaderboard. The test replays past purchases, so it shows how well the system predicts what shoppers bought, not what they would have bought if shown something else. Shoppers with no earlier purchases are left out of the headline score. The ranking model was lightly tuned on one validation week and trained with one random seed.",
     ],
-    tech: [
-      "Next.js",
-      "Vercel AI SDK",
-      "Gemini 3 Flash",
-      "Supabase",
-      "GitHub API",
-      "Slack",
-      "Vitest",
-      "GitHub Actions",
-    ],
-    github: "https://github.com/VanshikaGurbani/aidevopsagent",
+    tech: ["Python", "LightGBM", "FAISS", "PyTorch", "FastAPI", "Streamlit", "Docker", "GitHub Actions"],
+    github: "https://github.com/VanshikaGurbani/hm-two-stage-recommender",
+    live: "https://fashion-recommendersystem.streamlit.app/",
   },
   {
     name: "BioNER: Multi-task Biomedical NER",
@@ -300,129 +302,86 @@ export const projects: Project[] = [
     github: "https://github.com/VanshikaGurbani/Multi-BIONER",
   },
   {
-    name: "True Image Caption Generator",
+    name: "Experimentation Toolkit",
     tagline:
-      "Image captioning with CNN + LSTM and CNN + Transformer models, compared on the Flickr8k dataset.",
+      "Answers the question every online business asks about a change: did it really work? It checks that a controlled experiment (an A/B test) is trustworthy, measures the true effect and recommends whether to ship.",
     description:
-      "Undergraduate thesis project that generates natural-language captions for images. Implemented a CNN + LSTM baseline and an InceptionV3 + Transformer encoder-decoder in TensorFlow/Keras and compared their captions.",
+      "An independent project: a tested Python toolkit for A/B tests, run from start to finish on a public Criteo ad experiment with 13,979,592 users, where 85% were shown a campaign and 15% were held back for comparison. The outcome is whether a user visited the advertiser's website. It ends in a one-page decision memo and a live sample-size calculator you can try. It is not affiliated with Criteo.",
     highlights: [
-      "Built **two captioning pipelines**: a **CNN + LSTM** model (VGG16 / Xception image features) and an **InceptionV3 + Transformer** encoder-decoder with multi-head attention.",
-      "Trained on **Flickr8k** image-caption pairs with tokenization, feature extraction, and caption decoding in **TensorFlow/Keras**.",
-      "Compared **LSTM vs. Transformer** captions with **BLEU**: per-image scores of **0.71 to 0.73** on strong examples and near **0** on failures, which showed the Transformer producing more accurate captions.",
-      "Documented the work in a full undergraduate thesis report and a command-line caption generator.",
+      "**What it does.** The toolkit packages the steps of a careful A/B test: how many users you need, whether the groups were split fairly, how big the effect really is (with a margin of error), a way to get sharper answers from the same data, a ship or do-not-ship rule, and a model that finds which users are worth targeting.",
+      "**Checking the test can be trusted.** The split matched the design (a sample ratio check passed). But a model could still guess which group a user was in slightly better than a coin flip (a score of 51.1% on a scale where 50% means a clean experiment), so the two groups were not perfectly alike. The raw gap of +1.03 points therefore overstates the effect, and the headline is the adjusted lift: the visit rate rose from 4.04% to 4.78%, **+0.75 points** (95% range +0.71 to +0.78), about 7.5 extra visits per 1,000 users.",
+      "**The decision: ship, with a stated assumption.** The data has no cost or revenue, so the minimum lift worth acting on is a placeholder of +0.50 points, and the whole range sits above it. The call does depend on that threshold: ship at +0.25 and +0.50, run longer at +0.75, and do not ship at +1.00.",
+      "**Sharper answers from the same data.** A technique called **CUPED** uses what is already known about each user to cut noise. The simple version cut the variance of the estimate by 25.0%, and a machine-learning version (**CUPAC**) by 30.5%, so the same precision needs about 30% fewer users. The estimate itself also moved because of the imbalance above, which is why the adjusted lift stays the headline.",
+      "**Does the toolkit check itself?** An A/A test, which compares two random halves of the same group where there is no real difference, falsely flagged one 4.7% of the time against 5% expected. The sample-size calculator predicted 80% power for its planned size and measured 80.5% on real data. The unit tests compare each statistic with a textbook value, a second library or a simulation.",
+      "**Targeting.** Treating only the top 10% of users, ranked by a model that predicts who benefits, captures 59% of the extra visits, against 51% when ranking by who is likely to visit anyway. That is a modest gain, and a second model (a T-learner) did not beat the simple ranking.",
+      "**Honest limits.** Only 3.6% of treated users actually saw the ad, so this measures the effect of being assigned to the campaign. The threshold is an assumption, there is one experiment over one period with no checks for novelty or fatigue, and the notebook outputs come from one run with one seed.",
     ],
-    tech: ["TensorFlow", "Keras", "CNN", "LSTM", "Transformers", "InceptionV3"],
-    github: "https://github.com/VanshikaGurbani/Image-Caption",
+    figures: [
+      {
+        src: "/images/experimentation-toolkit/validity_forest_lift.png",
+        alt: "Visit-rate lift with 95% confidence intervals: raw difference +1.03 points, adjusted +0.75 points, against a placeholder threshold of +0.50 points.",
+        caption:
+          "The raw gap between the groups (+1.03 points) is larger than the adjusted lift (+0.75 points). Both clear the assumed +0.50 point threshold, shown as the dashed line.",
+        width: 1481,
+        height: 454,
+      },
+      {
+        src: "/images/experimentation-toolkit/validity_threshold_sensitivity.png",
+        alt: "Decision outcome (ship, run longer, do not ship) for each possible minimum-lift threshold, for the adjusted and the raw estimate.",
+        caption:
+          "How the decision depends on the minimum lift you require. On the adjusted estimate the answer is ship up to about +0.71 points, then run longer, then do not ship.",
+        width: 1350,
+        height: 712,
+      },
+      {
+        src: "/images/experimentation-toolkit/uplift_qini_curves.png",
+        alt: "Targeting curves comparing a model that predicts who benefits with a model that predicts who is likely to visit anyway.",
+        caption:
+          "Treating the highest-ranked users first captures most of the extra visits. A model that predicts who benefits (blue) beats simply ranking by likelihood to visit (grey) only modestly, as the right-hand panel shows.",
+        width: 1546,
+        height: 558,
+      },
+    ],
+    tech: ["Python", "DuckDB", "pandas", "scikit-learn", "LightGBM", "EconML", "Streamlit", "pytest", "GitHub Actions"],
+    github: "https://github.com/VanshikaGurbani/experimentation-toolkit",
+    live: "https://experimentation-toolkit.streamlit.app/",
   },
   {
-    name: "Growth Mindset Causal Analysis",
+    name: "Rossmann Sales Forecasting",
     tagline:
-      "Causal inference study measuring whether growth mindset interventions actually improve student achievement.",
+      "A six-week sales forecast for every store in a 1,115-store drugstore chain, tested the way a planner would really use it, with honest error bars.",
     description:
-      "Used multiple causal estimators on 10,391 synthetic student records modeled on the National Study of Learning Mindsets to estimate the treatment effect of a growth mindset program, not just correlation.",
+      "A forecasting project on the public Kaggle Rossmann drugstore data. For every open store it predicts daily sales 42 days ahead, so a planner could schedule staff and order stock. One shared LightGBM model covers all 1,115 stores, and it is scored on three later time windows it never saw, with no sales from the forecast period leaking in.",
     highlights: [
-      "Analyzed **10,391 synthetic student records** (76 schools, 32.6% treated) modeled on the National Study of Learning Mindsets, with a continuous achievement outcome.",
-      "Applied **seven specifications across four method families**: regression adjustment, **IPW**, **T-Learner** and **S-Learner** (Random Forest and XGBoost), and **Causal Forest** (EconML).",
-      "Estimated an **ATE of about 0.41 to 0.42** outcome units in every specification (95% CI roughly **0.39 to 0.44** for regression and IPW; Causal Forest **0.42**, CI 0.20 to 0.63), showing **estimator-agnostic robustness**.",
-      "Used **propensity score models**, overlap checks, and **covariate balance (Love plot, SMD)**; adjustment moved the naive difference of 0.46 to about 0.41. Presented results on an academic research poster.",
+      "**How it works.** One **global LightGBM** model (a fast tree-based forecasting model) learns from all stores at once instead of fitting one model per store. It uses each store's sales history (lagged by at least six weeks so nothing from the future leaks in), the planned promotion calendar, holidays and open or closed days, which are known in advance.",
+      "**How it was tested.** Three rolling tests: fit on everything before a start date, forecast the next 42 days, then repeat at a later start date. The start dates (August 2014, December 2014 covering Christmas, and June 2015) were fixed before any model was run.",
+      "**Results.** Error is measured as **WAPE**, the total miss divided by total sales. A typical store-day sells about 7,335, and the forecast is off by about 689 on average, or **9.2%**. The strongest simple baseline (the average of the last four same weekdays) is off by **18.9%**, so the error is cut by about half (51%). A Random Forest scored 10.4%. On a 100-store sample, Prophet fitted separately per store scored 17.9% (12.5% with promo and holiday information) against 9.4% for LightGBM on the same store-days.",
+      "**Uncertainty, measured honestly.** Every forecast comes with a 90% range. Actual sales landed inside it **86.4%** of the time overall, a little under the 90% target, and only 76.7% of the time in the Christmas window, where sales behave differently from the period used to calibrate the ranges.",
+      "**Where it struggles.** Store-days in the 14 days after a store reopens from a closure of two weeks or more are 1.3% of the data but have 16.4% error, against 9.2% for the rest. Planning at a coarser level is far steadier: 9.3% error for one store-day, 5.7% for one store-week and 2.8% for the whole chain by week.",
+      "**Promotions.** Promo days sold about **39% more** (95% range +36.6% to +41.9%) after allowing for store, weekday, month and holidays. This is an association, not proof that promotions cause it: every store follows the same alternating-week promo calendar, so there is no same-day comparison group. The planned promo calendar is also the most useful input, and removing it costs 1.5 points of error.",
+      "**Honest limits.** One chain and one period (January 2013 to July 2015), and three test windows is a small number. The promo calendar, holidays and opening days are assumed known in advance, and settings were fixed up front rather than tuned. Prophet was run on a random sample of stores, not all of them.",
     ],
-    tech: ["Python", "Causal Inference", "EconML", "Scikit-learn", "XGBoost"],
-    github: "https://github.com/VanshikaGurbani/growth-mindset-intervention",
+    tech: ["Python", "LightGBM", "Random Forest", "Prophet", "SHAP", "Conformal Prediction"],
+    github: "https://github.com/VanshikaGurbani/rossmann_forecasting",
   },
   {
-    name: "Gold Trading Strategy",
+    name: "NHANES Heart Risk",
     tagline:
-      "Backtested Google Trends and technical-indicator strategies for gold against a Buy & Hold benchmark.",
+      "Asks how well a handful of routine health measurements can tell which U.S. adults report heart disease, using four rounds of a public CDC health survey. An educational demo, not medical advice.",
     description:
-      "Built and compared three rule-based gold trading strategies (Google Trends only, Trends plus technical indicators, and a Buy & Hold/Trends hybrid) on a $10,000 portfolio for Algorithmic Trading & Portfolio Management at Rutgers.",
+      "An independent project that takes public CDC survey files (called NHANES) through a full data pipeline in PostgreSQL, trains three models and tests them on a later survey period than the one they learned from. It covers 22,512 U.S. adults from four survey rounds, 1,637 of whom reported heart disease. The labels are self-reported, so this is not a diagnosis, and the live demo is for education only. It is not affiliated with the CDC.",
     highlights: [
-      "The **hybrid strategy** reached a **Sharpe ratio of 1.28** vs. **0.70** for Buy & Hold, with a **72.9% cumulative return**.",
-      "Adding **RSI, MACD, Bollinger Bands, and SMA/EMA** to Google Trends signals lifted returns from **38.6% to 57.8%** while cutting trades from **27 to 11**.",
-      "Buy & Hold still led on raw return (**101.3%**), so the finding is a **risk-adjusted improvement**, not outperformance.",
-      "Ran a **Random Forest** price model and a **Trends vs. gold ETF correlation study**; data sourced via **pytrends** and **yfinance**.",
+      "**The pipeline.** It downloads 44 CDC files and checks each against a fingerprint (a SHA-256 hash) so a changed file stops the run. The files are loaded into PostgreSQL and cleaned and joined with plain SQL, where survey codes for \"refused\" or \"don't know\" become blanks. Then 42 automated data-quality checks run, and any failure stops everything.",
+      "**The question.** From age, sex, body measurements, blood pressure, blood tests, smoking, diabetes and alcohol answers, can a model tell who said a doctor had ever told them they had coronary heart disease, angina or a heart attack? In the 2017 to 2018 test group, 8.3% said yes (457 of 5,534). Medication questions, heart failure and stroke are kept out so the answer cannot leak in.",
+      "**How it was tested.** The models learned from 2011 to 2014, were tuned on 2015 to 2016, and were scored once on 2017 to 2018. The tuning, the model choice and the decision cut-off all used only the earlier data.",
+      "**How good is the ranking?** Pick one person who said yes and one who said no. The model gives the higher risk to the person who said yes in about 83 of 100 such pairs (a **ROC-AUC** of 82.9%, where a coin flip is 50). A model that knows only age and sex gets about 80, so the other measurements add a real but modest gain.",
+      "**The fancy model did not win.** Logistic regression, random forest and XGBoost all score about 83. XGBoost minus logistic regression is +0.1 points, with a 95% range of -0.4 to +0.6 that includes zero, so the data cannot show a winner. The simple model is used because it is easier to explain.",
+      "**The price of catching cases.** The cut-off was set on the earlier data to catch at least 90% of cases. On the latest round it caught **91.2%**, but it flagged **47%** of all adults, which is 5.3 false alarms for every case found. It gets there mostly by flagging almost every older adult (94% of those 60 and over).",
+      "**Honest limits.** The labels are self-reported, not a measured diagnosis, and the data covers the U.S. household population, so nothing transfers to hospital patients. Age carries most of the signal, there is only one test round with few cases so the ranges are wide, and survey weights were not used in the models. It is an educational demo and collects nothing.",
     ],
-    tech: ["Python", "pandas", "scikit-learn", "pytrends", "yfinance", "Backtesting"],
-    github: "https://github.com/VanshikaGurbani/GoldTradingStratergy",
-  },
-  {
-    name: "Coffee Trading with Weather Data",
-    tagline:
-      "Commodity trading strategies that use Brazilian weather as an alternative data source for coffee futures.",
-    description:
-      "Combined Visual Crossing weather data for Brazil with technical indicators to build and evaluate three coffee trading strategies, including weather-based position sizing.",
-    highlights: [
-      "Engineered **weather indicators** (frost events, drought conditions, extreme rainfall) alongside **Bollinger Bands, MACD, RSI, ATR, Keltner Channels, CCI, and VWAP**.",
-      "Built three strategies: **technical indicators**, **weather-integrated signal selection**, and **weather-based position sizing**, with leverage, stop-loss, and take-profit rules.",
-      "Evaluated with **Sharpe, Sortino, and Calmar ratios**, drawdowns, and win rates on a held-out test period (**Sep 2023 to Aug 2024**).",
-      "Aligned hourly weather and market data across time zones and aggregated to **daily features** with rolling and lagged variables.",
-    ],
-    tech: ["Python", "pandas", "Alternative Data", "Technical Analysis", "Backtesting"],
-    github:
-      "https://github.com/VanshikaGurbani/Commodity-Trading-based-on-alternate-Data-Sources-Weather-Data",
-  },
-  {
-    name: "Multi-Factor Alpha Research Pipeline",
-    tagline:
-      "Quant research pipeline that builds, backtests, and risk-models multi-factor long-short equity portfolios.",
-    description:
-      "End-to-end alpha research framework with live Yahoo Finance data, a seven-factor engine, constrained portfolio construction, cost-aware backtesting, and a Streamlit dashboard.",
-    highlights: [
-      "**Seven factors** (momentum, reversal, volatility, value, quality, liquidity, size) with vectorized computation, **winsorization, and z-scoring**.",
-      "**Long-short portfolios** with **sector-neutral and beta-neutral** constraints and leverage limits.",
-      "Backtests with **transaction costs and turnover penalties**, reporting Sharpe, drawdown, Calmar, and win rate; **Barra-style risk model** for exposure decomposition.",
-      "**IC-based and ML-based (Ridge/Lasso/ElasticNet) factor weighting** with rolling retraining; shipped with a **CLI, Docker, and Plotly/Streamlit dashboard**.",
-    ],
-    tech: ["Python", "pandas", "scikit-learn", "Plotly", "Streamlit", "Docker"],
-    github: "https://github.com/VanshikaGurbani/alpha-research",
-  },
-  {
-    name: "Banking GenAI Assistant",
-    tagline:
-      "Conversational banking assistant that pairs Rasa with Gemini for grounded answers and spending insights.",
-    description:
-      "Built a banking chatbot on Rasa 3.x with Google Gemini fallback, covering balances, transaction history, transfers, fraud reporting, and AI-powered spending analysis.",
-    highlights: [
-      "**Rasa 3.x** NLU with a **DIET classifier**, entity recognition, and synonym mapping; secure **multi-step forms** for transfers and sensitive operations.",
-      "**Gemini-powered fallback** answers unhandled queries with banking context and keeps conversation history for natural dialogue.",
-      "**Spending analysis** that categorizes transactions and generates insights with Gemini via custom Rasa actions.",
-      "Served through a **FastAPI `/chat` endpoint** and a **Streamlit** interface, containerized with **Docker**.",
-    ],
-    tech: ["Rasa", "Google Gemini", "FastAPI", "Streamlit", "Docker", "Python"],
-    github: "https://github.com/VanshikaGurbani/banking-genai-assistant",
-  },
-  {
-    name: "AI Job Application Automation",
-    tagline:
-      "Gemini-powered tool that scrapes jobs, tailors resumes, writes cover letters, and scores job fit.",
-    description:
-      "Automation app that scrapes LinkedIn listings, tailors a LaTeX resume to each job for ATS match, generates custom cover letters, rates job compatibility, and files documents to Google Drive.",
-    highlights: [
-      "**LinkedIn scraper** (Selenium) that saves listings to CSV, with duplicate prevention through smart file naming.",
-      "**LaTeX resume tailoring** that preserves formatting and rewrites only the skills section, compiled to **PDF** automatically.",
-      "**Cover letter generation and job match scoring** using **Gemini 2.5 Flash**, optimized for keyword and ATS alignment.",
-      "**Google Drive integration** for storing generated documents, wrapped in a **Streamlit** interface.",
-    ],
-    tech: ["Python", "Gemini 2.5 Flash", "Selenium", "Streamlit", "LaTeX", "Google Drive API"],
-    github: "https://github.com/VanshikaGurbani/job-automation-agent-app",
-  },
-  {
-    name: "H&M Fashion Recommender",
-    tagline:
-      "The \"you might also like\" row of an online clothing shop: for each shopper it picks the 12 items they are most likely to buy next week out of more than 100,000 H&M products, and explains each pick in plain words.",
-    description:
-      "An independent project built on H&M purchase data from a Kaggle competition (31.8 million purchases, 105,000 products, 1.37 million customers). A fast first step shortlists about 160 items per shopper, and a learned ranking model then sorts the shortlist. I measured it by replaying real shopping weeks it had never seen, and it beats the strongest simple rule by a margin that is unlikely to be luck. It has a live demo app and an API, and it is not made by or affiliated with H&M.",
-    highlights: [
-      "**How it works.** Two steps. First, six quick \"scouts\" build a shortlist of about 160 items per shopper: things they bought before, what is trending this week, what people of the same age buy, items often bought together, items liked by shoppers with similar taste (a method called **ALS**), and a small neural network (a **two-tower model**) that matches the style of recent purchases. Second, a learned ranking model (**LightGBM LambdaRank**) reads 44 clues per shopper and item, such as how often the shopper buys this kind of product, how popular the item is and how its price compares with what they usually spend, and puts the likeliest 12 first.",
-      "**How it was tested.** It is a replay of real life: the system only sees purchases up to a certain day, then its 12 suggestions are compared with what shoppers actually bought in the following 7 days. The last 7 days are the test, the 7 days before train the ranking model, older purchases are history, and automated tests check that nothing from the future leaks in. The score is **MAP@12**, which runs from 0 to 1 and is higher when the items a shopper really bought sit nearer the top of the 12 suggestions. It was measured on 5,726 shoppers from a random 10% sample of customers (136,228 people). Scores look small because shoppers buy only a few of 100,000+ products in a week.",
-      "**Results.** The full system scored **0.033** (95% confidence range 0.030 to 0.037) against **0.027** for the strongest simple rule, \"suggest what they bought before\" (range 0.024 to 0.031). The gain of **+0.006** is statistically reliable: its 95% confidence range is +0.004 to +0.008. Other simple rules scored far lower, about 0.009 for ALS, 0.008 for \"most popular\" and \"popular for your age\", and 0.007 for \"often bought together\".",
-      "**What helped and what did not.** Dropping the item clues cost 0.003 and dropping the shopper-and-item clues cost 0.002, both reliably. A text-understanding model that reads product descriptions added nothing detectable (a change of 0.0003, well inside the noise). The shortlist finds only about 16% of what shoppers go on to buy, which caps what the ranker can do, so better scouts are the biggest opportunity.",
-      "**A variety slider.** The demo lets you trade accuracy for variety using a re-ordering method called **MMR**. At the strongest setting I tested, the score drops from 0.0333 to 0.0307 while category variety rises from 0.63 to 0.69.",
-      "**Built as a working product.** Every suggestion carries a one-line reason built from the purchase records (for example \"you bought it 2 times, last 14 days ago\"), never invented. There is a live **Streamlit** demo, a **FastAPI** endpoint that returns a fresh recommendation in about 22 milliseconds (median, one machine), a **Docker** image, 48 automated tests and automatic checks on every change. H&M's data cannot be shared publicly, so the live demo runs on made-up sample shoppers while its charts and scores come from the real-data measurements.",
-      "**Honest limits.** Results come from a 10% sample of customers, so they cannot be compared with the public Kaggle leaderboard. The test replays past purchases, so it shows how well the system predicts what shoppers bought, not what they would have bought if shown something else. Shoppers with no earlier purchases are left out of the headline score. The ranking model was lightly tuned on one validation week and trained with one random seed.",
-    ],
-    tech: ["Python", "LightGBM", "FAISS", "PyTorch", "FastAPI", "Streamlit", "Docker", "GitHub Actions"],
-    github: "https://github.com/VanshikaGurbani/hm-two-stage-recommender",
-    live: "https://fashion-recommendersystem.streamlit.app/",
+    tech: ["Python", "PostgreSQL", "SQL", "scikit-learn", "XGBoost", "SHAP", "Streamlit", "Docker", "GitHub Actions"],
+    github: "https://github.com/VanshikaGurbani/nhanes-heart-risk",
+    live: "https://heartrisk-prediction-system.streamlit.app/",
   },
   {
     name: "Job Postings Insights",
@@ -453,19 +412,75 @@ export const projects: Project[] = [
     live: "https://jobpostingsinsights.streamlit.app/",
   },
   {
-    name: "Rossmann Sales Forecasting",
+    name: "AI DevOps Agent",
     tagline:
-      "Retail sales forecasting with causal promotion analysis and SHAP explainability.",
+      "A hackathon team project: an AI assistant for the engineers who keep websites running. It watches deployments on Vercel, flags failures, and on request finds the likely cause and opens a draft fix for a person to review.",
     description:
-      "Forecast daily sales for 1,115 Rossmann stores, quantified the real lift from promotions, and explained model decisions with SHAP and partial dependence plots.",
+      "A deployment is one release of a website to the internet, and Vercel is the service that hosts it. A daily check records failed deployments and unreachable sites as incidents and alerts the team in Slack. When someone asks, in Slack or the dashboard chat, the agent (powered by Google's Gemini 3 Flash model) works out the likely cause and opens a draft pull request, a proposed code change that a person must approve before it goes live.",
     highlights: [
-      "**Random Forest (RMSE 357)** and **XGBoost (RMSE 368)** cut error by about **50%** against the **Prophet (~780)** and **SARIMAX (~1285)** baselines.",
-      "**Counterfactual causal analysis** estimated an average promo lift of **$39.96 per day (+0.90%)**, a positive but moderate effect.",
-      "Engineered **lag, rolling-mean, promo-duration, and competition-age features** on roughly **1M rows** of daily sales (2013-2015).",
-      "Explained predictions with **SHAP** and **partial dependence plots** so results are usable by business stakeholders.",
+      "**Team project, built in 8 hours.** I co-built it with Ronit Gandhi at **Zero to Agent**, the Vercel x Google DeepMind hackathon. The safety rules, tests and bug fixes below are work I added afterwards.",
+      "**Detect, diagnose, fix.** A scheduled job (a task that runs on a timer) runs once a day, finds new failed deployments and websites that stopped responding, records each as an incident and posts one Slack alert per failure. Asked to investigate, the agent reads logs and code through the Vercel and GitHub APIs and opens a pull request with a fix. The daily job alone never changes any code.",
+      "**Slack control.** Plain-English **/devops** commands roll a project back to its last working version, list open incidents, check deployment status or compare settings between two projects. **Supabase**, a hosted database, keeps the incident history, and a weekly summary posts to Slack every Saturday.",
+      "**Safety first, because it acts on real systems.** Its pull requests open as drafts so a person has to approve them. It cannot commit straight to the main branch, cannot edit secret or CI files, refuses a change that looks like it contains a password or key (a pattern check, not a guarantee), and has a dry-run mode that reports what it would do without doing it.",
+      "**Checked on every change.** I added automated tests for the safety rules, the cron security and the monitor, plus a GitHub Actions workflow that runs a type check, the tests and a build. Along the way I fixed uptime incidents the database was rejecting, a cron endpoint that accepted requests when its secret was not set, and a deploy script that printed secret values to the terminal.",
+      "**Honest limits.** The repository has no measured numbers for how often the agent's fixes are correct, so I do not quote any. The monitor runs once a day because Vercel's free plan only allows daily scheduled jobs.",
     ],
-    tech: ["Python", "XGBoost", "Random Forest", "Prophet", "SHAP", "Causal Inference"],
-    github: "https://github.com/VanshikaGurbani/rossmann_forecasting",
+    tech: [
+      "Next.js",
+      "Vercel AI SDK",
+      "Gemini 3 Flash",
+      "Supabase",
+      "GitHub API",
+      "Slack",
+      "Vitest",
+      "GitHub Actions",
+    ],
+    github: "https://github.com/VanshikaGurbani/aidevopsagent",
+  },
+  {
+    name: "Growth Mindset Causal Analysis",
+    tagline:
+      "Causal inference study measuring whether growth mindset interventions actually improve student achievement.",
+    description:
+      "Used multiple causal estimators on 10,391 synthetic student records modeled on the National Study of Learning Mindsets to estimate the treatment effect of a growth mindset program, not just correlation.",
+    highlights: [
+      "Analyzed **10,391 synthetic student records** (76 schools, 32.6% treated) modeled on the National Study of Learning Mindsets, with a continuous achievement outcome.",
+      "Applied **seven specifications across four method families**: regression adjustment, **IPW**, **T-Learner** and **S-Learner** (Random Forest and XGBoost), and **Causal Forest** (EconML).",
+      "Estimated an **ATE of about 0.41 to 0.42** outcome units in every specification (95% CI roughly **0.39 to 0.44** for regression and IPW; Causal Forest **0.42**, CI 0.20 to 0.63), showing **estimator-agnostic robustness**.",
+      "Used **propensity score models**, overlap checks, and **covariate balance (Love plot, SMD)**; adjustment moved the naive difference of 0.46 to about 0.41. Presented results on an academic research poster.",
+    ],
+    tech: ["Python", "Causal Inference", "EconML", "Scikit-learn", "XGBoost"],
+    github: "https://github.com/VanshikaGurbani/growth-mindset-intervention",
+  },
+  {
+    name: "True Image Caption Generator",
+    tagline:
+      "Image captioning with CNN + LSTM and CNN + Transformer models, compared on the Flickr8k dataset.",
+    description:
+      "Undergraduate thesis project that generates natural-language captions for images. Implemented a CNN + LSTM baseline and an InceptionV3 + Transformer encoder-decoder in TensorFlow/Keras and compared their captions.",
+    highlights: [
+      "Built **two captioning pipelines**: a **CNN + LSTM** model (VGG16 / Xception image features) and an **InceptionV3 + Transformer** encoder-decoder with multi-head attention.",
+      "Trained on **Flickr8k** image-caption pairs with tokenization, feature extraction, and caption decoding in **TensorFlow/Keras**.",
+      "Compared **LSTM vs. Transformer** captions with **BLEU**: per-image scores of **0.71 to 0.73** on strong examples and near **0** on failures, which showed the Transformer producing more accurate captions.",
+      "Documented the work in a full undergraduate thesis report and a command-line caption generator.",
+    ],
+    tech: ["TensorFlow", "Keras", "CNN", "LSTM", "Transformers", "InceptionV3"],
+    github: "https://github.com/VanshikaGurbani/Image-Caption",
+  },
+  {
+    name: "AI Job Application Automation",
+    tagline:
+      "Gemini-powered tool that scrapes jobs, tailors resumes, writes cover letters, and scores job fit.",
+    description:
+      "Automation app that scrapes LinkedIn listings, tailors a LaTeX resume to each job for ATS match, generates custom cover letters, rates job compatibility, and files documents to Google Drive.",
+    highlights: [
+      "**LinkedIn scraper** (Selenium) that saves listings to CSV, with duplicate prevention through smart file naming.",
+      "**LaTeX resume tailoring** that preserves formatting and rewrites only the skills section, compiled to **PDF** automatically.",
+      "**Cover letter generation and job match scoring** using **Gemini 2.5 Flash**, optimized for keyword and ATS alignment.",
+      "**Google Drive integration** for storing generated documents, wrapped in a **Streamlit** interface.",
+    ],
+    tech: ["Python", "Gemini 2.5 Flash", "Selenium", "Streamlit", "LaTeX", "Google Drive API"],
+    github: "https://github.com/VanshikaGurbani/job-automation-agent-app",
   },
   {
     name: "Enhancing Airbnb Revenue: Dynamic Price Modeling",
@@ -560,7 +575,7 @@ export const contactData = {
 
 export const metrics = [
   { label: "Simulation Runtime Cut", value: "35%" },
-  { label: "Best NER Macro-F1", value: "0.93" },
+  { label: "Best NER Entity F1", value: "90.3" },
   { label: "Students Taught", value: "200+" },
   { label: "Medical Sources", value: "6+" },
 ];
