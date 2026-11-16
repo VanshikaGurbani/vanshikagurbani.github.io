@@ -30,9 +30,9 @@ const metaByName: Record<string, ProjectMeta> = {
       { value: "0-100", label: "Trust score per answer" },
     ],
   },
-  "H&M Fashion Recommender": {
+  "H&M Fashion Recommendation System": {
     slug: "hm-fashion-recommender",
-    shortName: "Fashion Recommender",
+    shortName: "H&M Fashion Recommendation System",
     category: "Machine Learning",
     metric: "Score 0.033 vs 0.027 for the best simple rule · 5,726 shoppers · live demo",
     flow: ["HISTORY", "SHORTLIST", "RANKER", "TOP 12"],
@@ -42,6 +42,34 @@ const metaByName: Record<string, ProjectMeta> = {
       { value: "+0.006", label: "Gain over that rule, 95% range +0.004 to +0.008" },
       { value: "~160", label: "Items shortlisted per shopper (finds 16% of what they buy)" },
       { value: "22 ms", label: "Median time for one fresh recommendation" },
+    ],
+  },
+  "Heart Risk Prediction System": {
+    slug: "heart-risk-prediction-system",
+    shortName: "Heart Risk Prediction System",
+    category: "Machine Learning",
+    metric: "22,512 adults · three models tie at about 83% ROC-AUC · 91.2% of cases caught, 47% flagged",
+    flow: ["SURVEY", "POSTGRES", "MODELS", "RISK"],
+    active: 2,
+    stats: [
+      { value: "22,512", label: "U.S. adults, four CDC survey rounds" },
+      { value: "83%", label: "ROC-AUC of three tied models (XGBoost did not win)" },
+      { value: "91.2%", label: "Of cases caught on the latest round, cut-off set on earlier data" },
+      { value: "47%", label: "Of all adults flagged to catch them" },
+    ],
+  },
+  "Retail SQL Dashboard": {
+    slug: "retail-sql-dashboard",
+    shortName: "Retail SQL Dashboard",
+    category: "Data & Analytics",
+    metric: "996,172 cleaned lines · £18.49M net revenue · 1,941 customers to target, 75% of £905k at risk",
+    flow: ["SALES", "SQL CLEAN", "SEGMENTS", "TARGETS"],
+    active: 2,
+    stats: [
+      { value: "£18.49M", label: "Net revenue over 24 months, year 2 up 1.9%" },
+      { value: "63.2%", label: "Of revenue from the top 10% of customers" },
+      { value: "28.3%", label: "Of customers bought only once" },
+      { value: "1,941", label: "Customers to target, holding 75% of the £905k at risk next quarter" },
     ],
   },
   "BioNER: Multi-task Biomedical NER": {
@@ -84,20 +112,6 @@ const metaByName: Record<string, ProjectMeta> = {
       { value: "9.2%", label: "Forecast error, vs 18.9% for the best simple baseline" },
       { value: "86.4%", label: "Of actual sales inside the 90% range (a little under target)" },
       { value: "+39%", label: "Sales on promo days (an association, not proven cause)" },
-    ],
-  },
-  "NHANES Heart Risk": {
-    slug: "nhanes-heart-risk",
-    shortName: "NHANES Heart Risk",
-    category: "Machine Learning",
-    metric: "22,512 adults · three models tie at about 83% ROC-AUC · 91.2% of cases caught, 47% flagged",
-    flow: ["SURVEY", "POSTGRES", "MODELS", "RISK"],
-    active: 2,
-    stats: [
-      { value: "22,512", label: "U.S. adults, four CDC survey rounds" },
-      { value: "83%", label: "ROC-AUC of three tied models (XGBoost did not win)" },
-      { value: "91.2%", label: "Of cases caught on the latest round, cut-off set on earlier data" },
-      { value: "47%", label: "Of all adults flagged to catch them" },
     ],
   },
   "Job Postings Insights": {

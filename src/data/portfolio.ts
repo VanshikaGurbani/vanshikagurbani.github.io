@@ -265,7 +265,7 @@ export const projects: Project[] = [
     live: "https://source-md.vercel.app",
   },
   {
-    name: "H&M Fashion Recommender",
+    name: "H&M Fashion Recommendation System",
     tagline:
       "The \"you might also like\" row of an online clothing shop: for each shopper it picks the 12 items they are most likely to buy next week out of more than 100,000 H&M products, and explains each pick in plain words.",
     description:
@@ -282,6 +282,71 @@ export const projects: Project[] = [
     tech: ["Python", "LightGBM", "FAISS", "PyTorch", "FastAPI", "Streamlit", "Docker", "GitHub Actions"],
     github: "https://github.com/VanshikaGurbani/hm-two-stage-recommender",
     live: "https://fashion-recommendersystem.streamlit.app/",
+  },
+  {
+    name: "Heart Risk Prediction System",
+    tagline:
+      "Asks how well a handful of routine health measurements can tell which U.S. adults report heart disease, using four rounds of a public CDC health survey. An educational demo, not medical advice.",
+    description:
+      "An independent project that takes public CDC survey files (called NHANES) through a full data pipeline in PostgreSQL, trains three models and tests them on a later survey period than the one they learned from. It covers 22,512 U.S. adults from four survey rounds, 1,637 of whom reported heart disease. The labels are self-reported, so this is not a diagnosis, and the live demo is for education only. It is not affiliated with the CDC.",
+    highlights: [
+      "**The pipeline.** It downloads 44 CDC files and checks each against a fingerprint (a SHA-256 hash) so a changed file stops the run. The files are loaded into PostgreSQL and cleaned and joined with plain SQL, where survey codes for \"refused\" or \"don't know\" become blanks. Then 42 automated data-quality checks run, and any failure stops everything.",
+      "**The question.** From age, sex, body measurements, blood pressure, blood tests, smoking, diabetes and alcohol answers, can a model tell who said a doctor had ever told them they had coronary heart disease, angina or a heart attack? In the 2017 to 2018 test group, 8.3% said yes (457 of 5,534). Medication questions, heart failure and stroke are kept out so the answer cannot leak in.",
+      "**How it was tested.** The models learned from 2011 to 2014, were tuned on 2015 to 2016, and were scored once on 2017 to 2018. The tuning, the model choice and the decision cut-off all used only the earlier data.",
+      "**How good is the ranking?** Pick one person who said yes and one who said no. The model gives the higher risk to the person who said yes in about 83 of 100 such pairs (a **ROC-AUC** of 82.9%, where a coin flip is 50). A model that knows only age and sex gets about 80, so the other measurements add a real but modest gain.",
+      "**The fancy model did not win.** Logistic regression, random forest and XGBoost all score about 83. XGBoost minus logistic regression is +0.1 points, with a 95% range of -0.4 to +0.6 that includes zero, so the data cannot show a winner. The simple model is used because it is easier to explain.",
+      "**The price of catching cases.** The cut-off was set on the earlier data to catch at least 90% of cases. On the latest round it caught **91.2%**, but it flagged **47%** of all adults, which is 5.3 false alarms for every case found. It gets there mostly by flagging almost every older adult (94% of those 60 and over).",
+      "**Honest limits.** The labels are self-reported, not a measured diagnosis, and the data covers the U.S. household population, so nothing transfers to hospital patients. Age carries most of the signal, there is only one test round with few cases so the ranges are wide, and survey weights were not used in the models. It is an educational demo and collects nothing.",
+    ],
+    tech: ["Python", "PostgreSQL", "SQL", "scikit-learn", "XGBoost", "SHAP", "Streamlit", "Docker", "GitHub Actions"],
+    github: "https://github.com/VanshikaGurbani/nhanes-heart-risk",
+    live: "https://heartrisk-prediction-system.streamlit.app/",
+  },
+  {
+    name: "Retail SQL Dashboard",
+    tagline:
+      "Which customers should next quarter's retention budget go to? A SQL-first analysis of two years of sales from a UK online gift shop that ends in a short list of customer groups and an estimate of the revenue at stake.",
+    description:
+      "An independent project built on a public dataset of 1,067,371 transaction lines from a UK online gift-ware retailer (December 2009 to November 2011). The records are messy, so every cleaning decision is written as plain SQL and counted. Three questions lead to one decision: how revenue is trending, how well customers come back, and which customers hold the most revenue and are most likely to go quiet. It has a live dashboard and is not affiliated with the retailer.",
+    highlights: [
+      "**Cleaning, in the open.** Some days appear twice, some rows are reversals of earlier mistakes and some are fees rather than products. Each rule is a SQL step run in order inside **DuckDB** (a database that runs on a laptop), and each step logs the rows it removed: 22,523 copies from overlapping sheets, 11,812 exact duplicates, 5,799 non-product charges and 25,100 rows outside the two-year window, among others. **996,172** of the **1,067,371** lines (93.3%) were kept.",
+      "**Revenue.** Net revenue (sales minus returns) was **£18.49M** over 24 months. Returns were **2.9%** of sales. The second year was **1.9%** higher than the first (£9.16M to £9.33M). Among customers with an ID, active customers rose from 4,239 to 4,293 but orders per customer fell from 4.29 to 4.11, which was the biggest driver of the change. September to November brings about 37% of each year's revenue.",
+      "**A few customers matter a lot.** The top 10% of customers hold **63.2%** of revenue, though no single customer is more than 3.5%. The United Kingdom is 85.3% of revenue. Many buyers are wholesalers, so averages hide a skewed base.",
+      "**Coming back.** **28.3%** of customers bought only once. About **21%** of a new cohort (customers grouped by the month of their first purchase) buys again the next month, and about 18% are still buying a year later. The first month is left out because it mixes new customers with people who were already buying before the data starts.",
+      "**Who is likely to go quiet.** Rather than pick an arbitrary cutoff, I sorted customers into six groups by how recently, how often and how much they buy (**RFM**), then rebuilt those groups at five past dates and measured the share of each that did not buy in the following 3 months. In the winter quarter, 33.5% of Champions lapsed, 56.4% of Loyal customers and 65.5% of \"At risk, high frequency\" customers.",
+      "**The decision.** Target Champions, Loyal and At risk high frequency: **1,941 customers** who hold **75%** of the **£905k** of revenue at risk next quarter. The effect of a campaign is a scenario, not a result: if it lowered their lapse rate by 5% to 20%, it would protect roughly £26k to £136k. That range is an assumption, because the data has no campaign history.",
+      "**Built to be checked.** All the SQL is visible in the repo. **88 tests** check that revenue adds up across every layer, that keys are unique and that the cleaning matches an independent pandas version (some tests need the full dataset and are skipped in **GitHub Actions**, which runs on a small synthetic sample). The results appear in a **Streamlit** dashboard, and the tables are exported as CSV for Tableau or Power BI.",
+      "**Honest limits.** The data has no costs or margins, so revenue is not profit. The campaign effect is assumed, and a hold-out test is how you would measure it. Winter lapse rates come from one winter. Guest checkouts (13.3% of revenue) have no customer ID, so they sit outside cohorts and segments, and returns cannot be linked to the original sale.",
+    ],
+    figures: [
+      {
+        src: "/images/retail-sql-dashboard/revenue_trend.png",
+        alt: "Net revenue per month with a three-month average; September to November is shaded.",
+        caption:
+          "Net revenue per month. The shaded September to November stretch is the busy season, about 37% of each year's revenue.",
+        width: 1485,
+        height: 675,
+      },
+      {
+        src: "/images/retail-sql-dashboard/cohort_heatmap.png",
+        alt: "Heatmap of the share of each monthly cohort of new customers that buys again, by months since first purchase.",
+        caption:
+          "Customers grouped by the month of their first purchase, and the share of each group that buys again in later months. About 21% come back the next month.",
+        width: 1392,
+        height: 915,
+      },
+      {
+        src: "/images/retail-sql-dashboard/rfm_segments.png",
+        alt: "Customer segments by share of customers, share of revenue and winter lapse rate.",
+        caption:
+          "Six customer groups: how many customers each holds, how much revenue, and how often it went quiet the next quarter. Champions are a small group with two thirds of the revenue.",
+        width: 1492,
+        height: 699,
+      },
+    ],
+    tech: ["Python", "SQL", "DuckDB", "pandas", "Streamlit", "pytest", "GitHub Actions"],
+    github: "https://github.com/VanshikaGurbani/retail-sql-dashboard",
+    live: "https://retail-sql-dashboard.streamlit.app/",
   },
   {
     name: "BioNER: Multi-task Biomedical NER",
@@ -363,25 +428,6 @@ export const projects: Project[] = [
     ],
     tech: ["Python", "LightGBM", "Random Forest", "Prophet", "SHAP", "Conformal Prediction"],
     github: "https://github.com/VanshikaGurbani/rossmann_forecasting",
-  },
-  {
-    name: "NHANES Heart Risk",
-    tagline:
-      "Asks how well a handful of routine health measurements can tell which U.S. adults report heart disease, using four rounds of a public CDC health survey. An educational demo, not medical advice.",
-    description:
-      "An independent project that takes public CDC survey files (called NHANES) through a full data pipeline in PostgreSQL, trains three models and tests them on a later survey period than the one they learned from. It covers 22,512 U.S. adults from four survey rounds, 1,637 of whom reported heart disease. The labels are self-reported, so this is not a diagnosis, and the live demo is for education only. It is not affiliated with the CDC.",
-    highlights: [
-      "**The pipeline.** It downloads 44 CDC files and checks each against a fingerprint (a SHA-256 hash) so a changed file stops the run. The files are loaded into PostgreSQL and cleaned and joined with plain SQL, where survey codes for \"refused\" or \"don't know\" become blanks. Then 42 automated data-quality checks run, and any failure stops everything.",
-      "**The question.** From age, sex, body measurements, blood pressure, blood tests, smoking, diabetes and alcohol answers, can a model tell who said a doctor had ever told them they had coronary heart disease, angina or a heart attack? In the 2017 to 2018 test group, 8.3% said yes (457 of 5,534). Medication questions, heart failure and stroke are kept out so the answer cannot leak in.",
-      "**How it was tested.** The models learned from 2011 to 2014, were tuned on 2015 to 2016, and were scored once on 2017 to 2018. The tuning, the model choice and the decision cut-off all used only the earlier data.",
-      "**How good is the ranking?** Pick one person who said yes and one who said no. The model gives the higher risk to the person who said yes in about 83 of 100 such pairs (a **ROC-AUC** of 82.9%, where a coin flip is 50). A model that knows only age and sex gets about 80, so the other measurements add a real but modest gain.",
-      "**The fancy model did not win.** Logistic regression, random forest and XGBoost all score about 83. XGBoost minus logistic regression is +0.1 points, with a 95% range of -0.4 to +0.6 that includes zero, so the data cannot show a winner. The simple model is used because it is easier to explain.",
-      "**The price of catching cases.** The cut-off was set on the earlier data to catch at least 90% of cases. On the latest round it caught **91.2%**, but it flagged **47%** of all adults, which is 5.3 false alarms for every case found. It gets there mostly by flagging almost every older adult (94% of those 60 and over).",
-      "**Honest limits.** The labels are self-reported, not a measured diagnosis, and the data covers the U.S. household population, so nothing transfers to hospital patients. Age carries most of the signal, there is only one test round with few cases so the ranges are wide, and survey weights were not used in the models. It is an educational demo and collects nothing.",
-    ],
-    tech: ["Python", "PostgreSQL", "SQL", "scikit-learn", "XGBoost", "SHAP", "Streamlit", "Docker", "GitHub Actions"],
-    github: "https://github.com/VanshikaGurbani/nhanes-heart-risk",
-    live: "https://heartrisk-prediction-system.streamlit.app/",
   },
   {
     name: "Job Postings Insights",
