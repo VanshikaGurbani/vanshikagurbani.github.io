@@ -155,18 +155,6 @@ const metaByName: Record<string, ProjectMeta> = {
       { value: "Flickr8k", label: "Training dataset" },
     ],
   },
-  "AI Job Application Automation": {
-    slug: "job-automation",
-    shortName: "Job Application Automation",
-    category: "Agentic AI",
-    metric: "Scrape · tailor resume · write cover letter · score fit",
-    flow: ["SCRAPE", "TAILOR", "LETTER", "DRIVE"],
-    active: 1,
-    stats: [
-      { value: "LaTeX", label: "Resume tailored, compiled to PDF" },
-      { value: "Gemini", label: "Cover letters and match scoring" },
-    ],
-  },
   "Enhancing Airbnb Revenue: Dynamic Price Modeling": {
     slug: "airbnb-pricing",
     shortName: "Airbnb Pricing Model",

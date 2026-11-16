@@ -468,21 +468,6 @@ export const projects: Project[] = [
     github: "https://github.com/VanshikaGurbani/Image-Caption",
   },
   {
-    name: "AI Job Application Automation",
-    tagline:
-      "Gemini-powered tool that scrapes jobs, tailors resumes, writes cover letters, and scores job fit.",
-    description:
-      "Automation app that scrapes LinkedIn listings, tailors a LaTeX resume to each job for ATS match, generates custom cover letters, rates job compatibility, and files documents to Google Drive.",
-    highlights: [
-      "**LinkedIn scraper** (Selenium) that saves listings to CSV, with duplicate prevention through smart file naming.",
-      "**LaTeX resume tailoring** that preserves formatting and rewrites only the skills section, compiled to **PDF** automatically.",
-      "**Cover letter generation and job match scoring** using **Gemini 2.5 Flash**, optimized for keyword and ATS alignment.",
-      "**Google Drive integration** for storing generated documents, wrapped in a **Streamlit** interface.",
-    ],
-    tech: ["Python", "Gemini 2.5 Flash", "Selenium", "Streamlit", "LaTeX", "Google Drive API"],
-    github: "https://github.com/VanshikaGurbani/job-automation-agent-app",
-  },
-  {
     name: "Enhancing Airbnb Revenue: Dynamic Price Modeling",
     tagline:
       "Pricing analytics pipeline that models Airbnb listing prices with regression to support data-driven pricing strategies for hosts.",
