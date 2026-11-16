@@ -4,7 +4,7 @@ import { ProjectCard } from "@/components/projects/ProjectCard";
 import { SectionWrapper } from "@/components/ui/SectionWrapper";
 import { getProjectBySlug } from "@/data/projects";
 
-const FEATURED_SLUGS = ["sourcemd", "ai-devops-agent", "hm-fashion-recommender", "job-postings-insights"];
+const FEATURED_SLUGS = ["sourcemd", "hm-fashion-recommender", "bioner", "experimentation-toolkit"];
 
 export function HomeProjects() {
   const [featured, ...rest] = FEATURED_SLUGS.map((slug) => {

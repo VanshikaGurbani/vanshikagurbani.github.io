@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, ArrowUpRight, FolderOpen, House } from "lucide-react";
@@ -167,6 +168,38 @@ export default async function ProjectPage({
           </ol>
         </div>
       </SectionWrapper>
+
+      {/* Charts */}
+      {project.figures && project.figures.length > 0 && (
+        <SectionWrapper className="py-12 md:py-16">
+          <div className="mx-auto max-w-5xl px-6 md:px-10">
+            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+              Charts from the analysis
+            </h2>
+            <div className="mt-8 space-y-8">
+              {project.figures.map((f) => (
+                <figure
+                  key={f.src}
+                  className="overflow-hidden rounded-xl border border-border bg-card/60"
+                >
+                  <div className="bg-white p-3 md:p-4">
+                    <Image
+                      src={f.src}
+                      alt={f.alt}
+                      width={f.width}
+                      height={f.height}
+                      className="h-auto w-full"
+                    />
+                  </div>
+                  <figcaption className="px-5 py-4 text-sm leading-relaxed text-muted md:text-base">
+                    {f.caption}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </SectionWrapper>
+      )}
 
       {/* Prev / next */}
       <SectionWrapper className="py-16 md:py-20">
