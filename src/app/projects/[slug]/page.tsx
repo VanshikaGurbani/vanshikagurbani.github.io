@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, ArrowUpRight, FolderOpen, House } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { FlowDiagram } from "@/components/projects/FlowDiagram";
-import { Rich } from "@/components/ui/Rich";
+import { ProjectSections } from "@/components/projects/ProjectSections";
 import { SectionWrapper } from "@/components/ui/SectionWrapper";
 import { allProjects, getProjectBySlug } from "@/data/projects";
 
@@ -47,7 +46,7 @@ export default async function ProjectPage({
 
   return (
     <div className="pt-24 pb-24">
-      <div className="mx-auto max-w-5xl px-6 md:px-10">
+      <div className="mx-auto max-w-7xl px-6 md:px-10">
         <div className="flex flex-wrap gap-3">
           <Link href="/" className={pill}>
             <House className="h-3.5 w-3.5" />
@@ -81,7 +80,7 @@ export default async function ProjectPage({
             ))}
           </dl>
 
-          <p className="mt-10 max-w-3xl text-lg leading-relaxed text-muted md:text-xl">
+          <p className="mt-10 max-w-5xl text-lg leading-relaxed text-muted md:text-xl">
             {project.description}
           </p>
 
@@ -125,18 +124,18 @@ export default async function ProjectPage({
 
       {/* System overview */}
       <SectionWrapper className="py-16 md:py-20">
-        <div className="mx-auto max-w-5xl border-t border-border px-6 pt-14 md:px-10">
+        <div className="mx-auto max-w-7xl border-t border-border px-6 pt-14 md:px-10">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
             System overview
           </h2>
-          <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted md:text-lg">
+          <p className="mt-4 max-w-5xl text-base leading-relaxed text-muted md:text-lg">
             {project.tagline}
           </p>
           <div className="diagram-panel mt-8 px-6 py-8 md:px-14 md:py-12">
             <FlowDiagram
               nodes={project.flow}
               active={project.active}
-              className="mx-auto max-w-3xl"
+              className="mx-auto max-w-4xl"
             />
           </div>
           <p className="mt-3 text-center text-xs font-mono uppercase tracking-[0.2em] text-muted">
@@ -145,65 +144,12 @@ export default async function ProjectPage({
         </div>
       </SectionWrapper>
 
-      {/* Highlights */}
-      <SectionWrapper className="py-4 md:py-6">
-        <div className="mx-auto max-w-5xl px-6 md:px-10">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            What I built
-          </h2>
-          <ol className="mt-8 space-y-4">
-            {project.highlights.map((h, n) => (
-              <li
-                key={n}
-                className="flex gap-5 rounded-xl border border-border bg-card/60 p-5 backdrop-blur-sm md:p-6"
-              >
-                <span className="font-mono text-sm font-semibold text-accent-2">
-                  {String(n + 1).padStart(2, "0")}
-                </span>
-                <p className="text-base leading-relaxed text-muted md:text-lg">
-                  <Rich text={h} />
-                </p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </SectionWrapper>
-
-      {/* Charts */}
-      {project.figures && project.figures.length > 0 && (
-        <SectionWrapper className="py-12 md:py-16">
-          <div className="mx-auto max-w-5xl px-6 md:px-10">
-            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              Charts from the analysis
-            </h2>
-            <div className="mt-8 space-y-8">
-              {project.figures.map((f) => (
-                <figure
-                  key={f.src}
-                  className="overflow-hidden rounded-xl border border-border bg-card/60"
-                >
-                  <div className="bg-white p-3 md:p-4">
-                    <Image
-                      src={f.src}
-                      alt={f.alt}
-                      width={f.width}
-                      height={f.height}
-                      className="h-auto w-full"
-                    />
-                  </div>
-                  <figcaption className="px-5 py-4 text-sm leading-relaxed text-muted md:text-base">
-                    {f.caption}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </SectionWrapper>
-      )}
+      {/* Case study */}
+      <ProjectSections sections={project.sections} />
 
       {/* Prev / next */}
       <SectionWrapper className="py-16 md:py-20">
-        <div className="mx-auto grid max-w-5xl gap-4 px-6 md:grid-cols-2 md:px-10">
+        <div className="mx-auto grid max-w-7xl gap-4 px-6 md:grid-cols-2 md:px-10">
           <Link
             href={`/projects/${prev.slug}/`}
             className="group rounded-xl border border-border bg-card/60 p-5 transition-colors hover:border-accent/50"
