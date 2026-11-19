@@ -1,4 +1,5 @@
 import { projects, type Project } from "./portfolio";
+import { sectionsByName, type ProjectSection } from "./projectContent";
 
 // A column in a pipeline diagram: one node, or two stacked (branching) nodes.
 export type FlowNode = string | [string, string];
@@ -13,7 +14,7 @@ export interface ProjectMeta {
   stats: { value: string; label: string }[];
 }
 
-export type ProjectView = Project & ProjectMeta;
+export type ProjectView = Project & ProjectMeta & { sections: ProjectSection[] };
 
 const metaByName: Record<string, ProjectMeta> = {
   SourceMD: {
@@ -186,7 +187,9 @@ const metaByName: Record<string, ProjectMeta> = {
 export const allProjects: ProjectView[] = projects.map((p) => {
   const meta = metaByName[p.name];
   if (!meta) throw new Error(`Missing project metadata for "${p.name}"`);
-  return { ...p, ...meta };
+  const sections = sectionsByName[p.name];
+  if (!sections) throw new Error(`Missing sections for "${p.name}"`);
+  return { ...p, ...meta, sections };
 });
 
 export function getProjectBySlug(slug: string) {

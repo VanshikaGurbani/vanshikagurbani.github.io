@@ -1,0 +1,1174 @@
+import type { ProjectFigure } from "./portfolio";
+
+export type Tone = "good" | "accent" | "muted" | "warn";
+
+export type ChartSpec =
+  | {
+      type: "bars";
+      title: string;
+      unit?: string;
+      decimals?: number;
+      min?: number;
+      max?: number;
+      items: { label: string; value: number; display?: string; tone?: Tone }[];
+      note?: string;
+    }
+  | {
+      type: "grouped";
+      title: string;
+      unit?: string;
+      decimals?: number;
+      min?: number;
+      max?: number;
+      series: string[];
+      categories: { label: string; values: number[] }[];
+      note?: string;
+    }
+  | {
+      type: "range";
+      title: string;
+      min: number;
+      max: number;
+      items: { label: string; point: number; low?: number; high?: number; tone?: Tone }[];
+      note?: string;
+    }
+  | {
+      type: "ladder";
+      title: string;
+      items: { label: string; outcome: "ship" | "run" | "stop" }[];
+      note?: string;
+    };
+
+export interface Tile {
+  title: string;
+  text: string;
+}
+
+export interface ProjectSection {
+  kicker?: string;
+  heading: string;
+  body?: string[];
+  stats?: { value: string; label: string }[];
+  charts?: ChartSpec[];
+  figures?: ProjectFigure[];
+  tiles?: Tile[];
+  /** "steps" numbers the tiles, "limits" shows a compact caution grid. */
+  tileTone?: "steps" | "limits";
+}
+
+const fig = (
+  project: string,
+  file: string,
+  alt: string,
+  caption: string,
+  width: number,
+  height: number,
+): ProjectFigure => ({ src: `/images/${project}/${file}`, alt, caption, width, height });
+
+export const sectionsByName: Record<string, ProjectSection[]> = {
+  /* ------------------------------------------------------------------ */
+  SourceMD: [
+    {
+      kicker: "How it works",
+      heading: "From an AI answer to a checked answer",
+      body: [
+        `Paste a medical question and an AI's answer. SourceMD splits the answer into single factual claims, retrieves the closest guideline passages for each one, and has an AI model (Groq's **gpt-oss-120b**) judge the claim against them: supported, unsupported or contradicted. It is a 3-step pipeline built with **LangGraph**, a tool for chaining AI steps.`,
+        `Retrieval searches **844 guideline passages** by meaning rather than exact words, using **ChromaDB**, a database built for that kind of search. When the guidelines have nothing close to a claim, it falls back to trusted medical sites (NIH, WHO, PubMed and others) through the **Tavily** search API and labels those sources as live web.`,
+        `Each verdict is weighted by how confident the AI is and combined into a trust score from **0 to 100**, shown next to a corrected answer with page-level citations. The share of claims not marked supported is a warning signal, not an accuracy score.`,
+      ],
+      tileTone: "steps",
+      tiles: [
+        { title: "Extract claims", text: "The answer is split into single factual claims." },
+        { title: "Retrieve passages", text: "The closest of 844 guideline passages are found by meaning." },
+        { title: "Judge each claim", text: "gpt-oss-120b marks it supported, unsupported or contradicted." },
+        { title: "Web backup", text: "If the guidelines are silent, trusted medical sites are searched." },
+        { title: "Trust score", text: "Verdicts are weighted by confidence into a 0 to 100 score." },
+      ],
+    },
+    {
+      kicker: "The evidence",
+      heading: "Does looking things up help?",
+      body: [
+        `On **57 held-out test claims** (claims I did not use while tuning), the verdict was right **83%** of the time when the AI could consult the guidelines, against **61%** when it judged from memory alone.`,
+        `Two alternatives were tested and left out. Adding live web search to every claim scored 81%. Mixing keyword and meaning search scored 86% overall but found only 65% of contradicted claims, against 76% for meaning search alone, so I left it off.`,
+        `The trust score put fully supported answers above flawed ones with a score of **0.98** across 20 test answers, on a scale where 1.0 would be a perfect ranking. When the AI quotes a guideline, the quote really appears in the passage it cites **95%** of the time.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Verdicts right on 57 held-out claims",
+          unit: "%",
+          max: 100,
+          items: [
+            { label: "Guideline lookup (used)", value: 83, tone: "good" },
+            { label: "Keyword + meaning search (left off)", value: 86, tone: "muted" },
+            { label: "Live web search on every claim", value: 81, tone: "muted" },
+            { label: "AI memory alone", value: 61, tone: "warn" },
+          ],
+        },
+        {
+          type: "bars",
+          title: "Contradicted claims found",
+          unit: "%",
+          max: 100,
+          items: [
+            { label: "Meaning search (used)", value: 76, tone: "good" },
+            { label: "Keyword + meaning search", value: 65, tone: "muted" },
+          ],
+          note: "The mixed search won overall but missed more contradictions, which is the costly error in medicine.",
+        },
+      ],
+    },
+    {
+      kicker: "Engineering",
+      heading: "Light enough for a free server",
+      body: [
+        `Swapping the embedding step (the part that turns text into numbers so it can be searched by meaning) from PyTorch to **ONNX**, a leaner way of running the model, via **FastEmbed** cut peak memory **53%**, so the backend fits Render's free 512 MB tier.`,
+        `**90 automated tests**, lint (an automatic style check), type checks and a build run on every change in **GitHub Actions**. The stack is **FastAPI**, **Neon PostgreSQL** and a **React + TypeScript** frontend on Vercel.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Peak memory in a Linux container (MB)",
+          unit: " MB",
+          max: 600,
+          items: [
+            { label: "Before (PyTorch)", value: 526, tone: "warn" },
+            { label: "After (ONNX + FastEmbed)", value: 247, tone: "good" },
+          ],
+          note: "Render's free tier allows 512 MB.",
+        },
+      ],
+    },
+    {
+      kicker: "Be skeptical",
+      heading: "Honest limits",
+      tileTone: "limits",
+      tiles: [
+        { title: "Small test set", text: "The test set is small, so differences of a few percent are noise." },
+        { title: "Claims I wrote", text: "I wrote the claims from the guideline text itself, so they are cleaner than real chatbot output and the accuracy is probably optimistic." },
+        { title: "AI-checked labels", text: "The labels were cross-checked by AI, not reviewed by a clinician." },
+        { title: "Four guidelines", text: "It checks against four guidelines only, and pulling claims out of an answer was not part of this test." },
+        { title: "Slow first request", text: "On the live demo, the first request after idle can take 30 to 60 seconds while the free server wakes up." },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "H&M Fashion Recommendation System": [
+    {
+      kicker: "How it works",
+      heading: "Shortlist first, then rank",
+      body: [
+        `The system fills the "you might also like" row of a clothing shop. Six quick scouts build a shortlist averaging **163** items per shopper, then a learned ranking model sorts it and puts the likeliest **12** first.`,
+        `The ranker is **LightGBM**, a fast tree-based model trained to sort lists. It reads **44** clues per shopper and item, such as how often the shopper buys this kind of product, how popular the item is and how its price compares with what they usually spend.`,
+      ],
+      stats: [
+        { value: "163", label: "Items shortlisted per shopper, on average" },
+        { value: "44", label: "Clues the ranker reads per shopper and item" },
+        { value: "12", label: "Suggestions shown" },
+      ],
+      tileTone: "steps",
+      tiles: [
+        { title: "Bought before", text: "Things the shopper has bought, weighted toward recent purchases." },
+        { title: "Trending now", text: "What is selling this week." },
+        { title: "Same age group", text: "What people of the same age buy." },
+        { title: "Bought together", text: "Items often bought together." },
+        { title: "Similar taste", text: "Items liked by shoppers with similar taste (a method called ALS)." },
+        { title: "Style match", text: "A small neural network that matches the style of recent purchases." },
+      ],
+    },
+    {
+      kicker: "Honest evaluation",
+      heading: "A replay of real shopping weeks",
+      body: [
+        `The system only sees purchases up to a certain day, then its 12 suggestions are compared with what shoppers actually bought in the following 7 days. The last 7 days are the test, the 7 days before train the ranking model, older purchases are history, and automated tests check that nothing from the future leaks in.`,
+        `The score rewards putting the items a shopper really bought near the top of the 12 suggestions, on a scale from 0 to 1. It was measured on **5,726** shoppers from a random 10% sample of customers. Scores look small because shoppers buy only a few of 100,000+ products in a week, so what matters is the comparison between systems.`,
+      ],
+      stats: [
+        { value: "31.8M", label: "Purchases in the data" },
+        { value: "105,000", label: "Products" },
+        { value: "1.37M", label: "Customers" },
+        { value: "5,726", label: "Shoppers in the test" },
+      ],
+    },
+    {
+      kicker: "Results",
+      heading: "22% better than the best simple rule",
+      body: [
+        `The full system scored **0.0333** against 0.0273 for the strongest simple rule, "suggest what they bought before": **22%** better. The gain is statistically reliable: the range it very likely falls in (a 95% confidence range) is 0.0039 to 0.0079 and does not include zero.`,
+        `It scores **4.1 times** the most-popular list (0.0081). The other simple rules scored far lower: ALS 0.0092, "popular for your age" 0.0082 and "often bought together" 0.0069.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Score on the replayed test week (higher is better)",
+          decimals: 4,
+          max: 0.036,
+          items: [
+            { label: "Full system", value: 0.0333, tone: "good" },
+            { label: "Suggest what they bought before", value: 0.0273, tone: "accent" },
+            { label: "Similar taste (ALS)", value: 0.0092, tone: "muted" },
+            { label: "Popular for your age", value: 0.0082, tone: "muted" },
+            { label: "Most popular", value: 0.0081, tone: "muted" },
+            { label: "Bought together", value: 0.0069, tone: "muted" },
+          ],
+        },
+      ],
+    },
+    {
+      kicker: "What mattered",
+      heading: "Which clues earned their place",
+      body: [
+        `Removing the item clues cost **0.0029** of score and removing the shopper-and-item clues cost 0.0021, both reliably. A text-understanding model that reads product descriptions changed the score by 0.0003, well inside the noise.`,
+        `The shortlist finds only **16.47%** of what shoppers go on to buy, which caps what the ranker can do, so better scouts are the biggest opportunity.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Score when one group of clues is removed",
+          decimals: 4,
+          min: 0.028,
+          max: 0.0345,
+          items: [
+            { label: "All clues", value: 0.0333, tone: "good" },
+            { label: "Without text model", value: 0.033, tone: "muted" },
+            { label: "Without scout scores", value: 0.0318, tone: "muted" },
+            { label: "Without shopper clues", value: 0.0315, tone: "muted" },
+            { label: "Without shopper-item clues", value: 0.0311, tone: "warn" },
+            { label: "Without item clues", value: 0.0303, tone: "warn" },
+          ],
+          note: "The axis starts at 0.028 so the differences are visible.",
+        },
+        {
+          type: "bars",
+          title: "Share of purchased items each scout finds",
+          unit: "%",
+          decimals: 2,
+          max: 18,
+          items: [
+            { label: "All scouts together", value: 16.47, tone: "good" },
+            { label: "Style match", value: 6.39, tone: "accent" },
+            { label: "Trending now", value: 5.0, tone: "muted" },
+            { label: "Bought before", value: 4.99, tone: "muted" },
+            { label: "Same age group", value: 4.98, tone: "muted" },
+            { label: "Similar taste", value: 4.74, tone: "muted" },
+            { label: "Bought together", value: 3.13, tone: "muted" },
+          ],
+        },
+      ],
+    },
+    {
+      kicker: "Trade-off",
+      heading: "A variety slider",
+      body: [
+        `The demo lets you trade accuracy for variety using a re-ordering method called **MMR**. At the strongest setting I tested, the score drops from 0.0333 to **0.0307** while category variety rises from 0.63 to **0.69**.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Score as the re-ordering weight drops",
+          decimals: 4,
+          min: 0.03,
+          max: 0.034,
+          items: [
+            { label: "1.0 (no re-ordering)", value: 0.0333, tone: "good" },
+            { label: "0.9", value: 0.033, tone: "accent" },
+            { label: "0.8", value: 0.0327, tone: "accent" },
+            { label: "0.7", value: 0.0323, tone: "accent" },
+            { label: "0.5", value: 0.0307, tone: "warn" },
+          ],
+          note: "The axis starts at 0.030.",
+        },
+        {
+          type: "bars",
+          title: "Category variety at the same settings",
+          decimals: 3,
+          min: 0.6,
+          max: 0.7,
+          items: [
+            { label: "1.0 (no re-ordering)", value: 0.634, tone: "muted" },
+            { label: "0.9", value: 0.641, tone: "accent" },
+            { label: "0.8", value: 0.65, tone: "accent" },
+            { label: "0.7", value: 0.66, tone: "accent" },
+            { label: "0.5", value: 0.685, tone: "good" },
+          ],
+          note: "The axis starts at 0.600.",
+        },
+      ],
+    },
+    {
+      kicker: "Built as a product",
+      heading: "A working demo and API",
+      body: [
+        `Every suggestion carries a one-line reason built from the purchase records (for example "you bought it 2 times, last 14 days ago"), never invented. An **API** (a way for other programs to request recommendations) returns one fresh recommendation in **22 milliseconds** (median of single requests on one machine).`,
+        `There is a live **Streamlit** demo (a web app), a **Docker** image (a packaged copy that runs anywhere), **48** automated tests and automatic checks on every change. H&M's data cannot be shared publicly, so the live demo runs on made-up sample shoppers while its charts and scores come from the real-data measurements.`,
+      ],
+      stats: [
+        { value: "22 ms", label: "Median time for one recommendation request" },
+        { value: "48", label: "Automated tests" },
+      ],
+    },
+    {
+      kicker: "Be skeptical",
+      heading: "Honest limits",
+      tileTone: "limits",
+      tiles: [
+        { title: "Sample only", text: "Results come from a 10% sample of customers, so they cannot be compared with the public Kaggle leaderboard." },
+        { title: "Past purchases only", text: "The test replays past purchases, so it shows how well the system predicts what shoppers bought, not what they would have bought if shown something else." },
+        { title: "New shoppers left out", text: "Shoppers with no earlier purchases are left out of the headline score." },
+        { title: "Light tuning", text: "The ranking model was lightly tuned on one validation week and trained once." },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "Heart Risk Prediction System": [
+    {
+      kicker: "The pipeline",
+      heading: "From CDC files to a working app",
+      body: [
+        `It downloads **44** CDC files and checks each against a fingerprint (a SHA-256 hash) so a changed file stops the run. The files are loaded into **PostgreSQL** and cleaned and joined with plain SQL, where survey codes for "refused" or "don't know" become blanks. Then **42** automated data-quality checks run, and any failure stops everything.`,
+        `You enter age, sex, body measurements such as BMI and waist, blood pressure, cholesterol, blood sugar, smoking, diabetes and drinking. The app returns an estimated chance, framed as a statistic about survey respondents who answered like you and not a prediction about you, plus whether a demo screening rule would flag the answers.`,
+      ],
+      stats: [
+        { value: "44", label: "CDC files, each checked by fingerprint" },
+        { value: "42", label: "Automated data-quality checks" },
+        { value: "22,512", label: "U.S. adults in four survey rounds" },
+        { value: "1,637", label: "Reported heart disease" },
+      ],
+    },
+    {
+      kicker: "The test",
+      heading: "How good is the ranking?",
+      body: [
+        `The question: from those answers, can a model tell who said a doctor had ever told them they had coronary heart disease, angina or a heart attack? In the 2017 to 2018 test group, **8.3%** said yes (457 of 5,534). Medication questions, heart failure and stroke are kept out so the answer cannot leak in.`,
+        `The models learned from 2011 to 2014, were tuned on 2015 to 2016, and were scored once on 2017 to 2018, survey years they had never seen. Pick one person who said yes and one who said no. The model gives the higher risk to the person who said yes in **82.9%** of such pairs (this measure is called ROC-AUC; a coin flip would score 50%).`,
+        `Logistic regression, random forest and XGBoost are within the margin of error of each other, so the data cannot show a winner. The simplest, logistic regression, is used because it is easiest to explain. A model that knows only age and sex scores 79.5%, so the other measurements add a real but modest gain.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Share of yes/no pairs ranked correctly",
+          unit: "%",
+          decimals: 1,
+          min: 50,
+          max: 90,
+          items: [
+            { label: "Age and sex only", value: 79.5, tone: "muted" },
+            { label: "Logistic regression (used)", value: 82.9, tone: "good" },
+            { label: "Random forest", value: 82.9, tone: "accent" },
+            { label: "XGBoost", value: 83.0, tone: "accent" },
+          ],
+          note: "The axis starts at 50%, which is a coin flip.",
+        },
+      ],
+    },
+    {
+      kicker: "The trade-off",
+      heading: "The price of catching cases",
+      body: [
+        `The cut-off was set on the earlier data to catch at least 90% of cases. On the latest survey round it caught **91.2%** of the people who reported heart disease, but it flagged **47%** of all adults, which is **5.3** false alarms for every case found.`,
+        `It gets there mostly by flagging almost every older adult: **94%** of those 60 and over. Catching more cases costs more false alarms, as the right-hand chart shows.`,
+      ],
+      stats: [
+        { value: "91.2%", label: "Of people reporting heart disease caught" },
+        { value: "47%", label: "Of all adults flagged" },
+        { value: "5.3", label: "False alarms per case found" },
+        { value: "94%", label: "Of adults 60 and over flagged" },
+      ],
+      figures: [
+        fig(
+          "heart-risk-prediction-system",
+          "threshold_tradeoff.png",
+          "Left: recall, precision and share flagged as the decision threshold moves. Right: false alarms per person found at four recall targets (4.0, 4.3, 5.3 and 6.4).",
+          "Left: how the share of cases caught, the share of flags that are right and the share of adults flagged move with the cut-off. Right: the false alarms per case found at four targets for cases caught.",
+          1784,
+          689,
+        ),
+      ],
+    },
+    {
+      kicker: "Be skeptical",
+      heading: "Honest limits",
+      tileTone: "limits",
+      tiles: [
+        { title: "Self-reported labels", text: "The answers are self-reported by survey respondents, not a measured diagnosis." },
+        { title: "Not for patients", text: "The data covers the U.S. household population, so nothing transfers to hospital patients." },
+        { title: "Age dominates", text: "Age carries most of the signal." },
+        { title: "One test round", text: "There is only one test round with few cases, so the margins of error are wide." },
+        { title: "No re-weighting", text: "Answers were not re-weighted to match the U.S. population." },
+        { title: "Educational demo", text: "It is not medical advice, and it collects nothing." },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "Retail SQL Dashboard": [
+    {
+      kicker: "The data",
+      heading: "Cleaning messy records in plain SQL",
+      body: [
+        `Some days appear twice, some rows are reversals of earlier mistakes and some are fees rather than products. Each rule is a **SQL** step (SQL is the standard language for asking databases questions) run in order inside **DuckDB** (a database that runs on a laptop), and each step logs the rows it removed.`,
+        `**996,172** of the **1,067,371** lines (93.3%) were kept after cleaning.`,
+      ],
+      figures: [
+        fig("retail-sql-dashboard", "dq_bridge.png", "Rows removed by each cleaning rule: 22,523 overlap copies, 11,812 exact duplicates, 5,799 non-product charges, 3,393 sign conflicts, 2,572 non-positive prices and 25,100 rows outside the window.", "Rows removed by each cleaning rule. Each row is removed by the first rule that matches.", 1335, 555),
+      ],
+    },
+    {
+      kicker: "Revenue",
+      heading: "£18.49M of net revenue, up 1.9%",
+      body: [
+        `Net revenue (sales minus returns) was **£18.49M** over 24 months. Returns were **2.9%** of sales. The second year was **1.9%** higher than the first (£9.16M to £9.33M).`,
+        `Among customers with an ID, orders per customer fell from 4.29 to **4.11**, the biggest driver of the change. September to November brings **37.5%** of the second year's revenue.`,
+      ],
+      stats: [
+        { value: "£18.49M", label: "Net revenue over 24 months" },
+        { value: "2.9%", label: "Of sales were returned" },
+        { value: "1.9%", label: "Growth, year 2 over year 1" },
+        { value: "37.5%", label: "Of year 2 revenue in September to November" },
+      ],
+      figures: [
+        fig("retail-sql-dashboard", "revenue_trend.png", "Net revenue per month with a three-month average; September to November is shaded.", "Net revenue per month. The shaded September to November stretch is the busy season.", 1485, 675),
+        fig("retail-sql-dashboard", "revenue_drivers.png", "Contribution to the year-on-year change: active customers +£101k, orders per customer -£355k, revenue per order +£87k.", "What moved revenue for customers with an ID: more customers and bigger orders helped, but fewer orders per customer pulled it down.", 1460, 525),
+      ],
+    },
+    {
+      kicker: "Customers",
+      heading: "A few customers matter a lot, and many do not return",
+      body: [
+        `The top 10% of customers hold **63.2%** of revenue, and **28.3%** of customers bought only once.`,
+        `**21.0%** of a new cohort (customers grouped by the month of their first purchase) buys again the next month. The first month (December 2009) is left out because it mixes new customers with people who were already buying before the data starts.`,
+      ],
+      stats: [
+        { value: "63.2%", label: "Of revenue from the top 10% of customers" },
+        { value: "28.3%", label: "Of customers bought only once" },
+        { value: "21.0%", label: "Of a new cohort buys again next month" },
+      ],
+      figures: [
+        fig("retail-sql-dashboard", "cohort_heatmap.png", "Heatmap of the share of each monthly cohort of new customers that buys again, by months since first purchase.", "Customers grouped by the month of their first purchase, and the share of each group that buys again in later months.", 1392, 915),
+      ],
+    },
+    {
+      kicker: "Churn risk",
+      heading: "Who is likely to go quiet",
+      body: [
+        `I sorted customers into six groups by how recently, how often and how much they buy (a method called **RFM**). Rather than pick an arbitrary cutoff, I rebuilt the groups at five past dates and measured the share of each that did not buy in the following 3 months.`,
+        `In the winter quarter, **65.5%** of "At risk, high frequency" customers did not buy again, against 33.5% of Champions.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Share that did not buy in the next 3 months (winter)",
+          unit: "%",
+          decimals: 1,
+          max: 100,
+          items: [
+            { label: "Champions (targeted)", value: 33.5, tone: "good" },
+            { label: "Loyal (targeted)", value: 56.4, tone: "good" },
+            { label: "At risk, high frequency (targeted)", value: 65.5, tone: "good" },
+            { label: "Recent, low frequency", value: 75.1, tone: "muted" },
+            { label: "Cooling", value: 80.0, tone: "muted" },
+            { label: "Dormant", value: 89.0, tone: "muted" },
+          ],
+        },
+      ],
+      figures: [
+        fig("retail-sql-dashboard", "rfm_segments.png", "Customer segments by share of customers, share of revenue and winter lapse rate.", "Six customer groups: how many customers each holds, how much revenue, and how often it went quiet the next quarter.", 1492, 699),
+      ],
+    },
+    {
+      kicker: "The decision",
+      heading: "Who to target, and what is at stake",
+      body: [
+        `Target Champions, Loyal and At risk high frequency: **1,941 customers**. They hold **75%** of the £905k of revenue at risk next quarter (an estimate from past patterns).`,
+        `If a campaign lowered their lapse rate by 5% to 20%, it would protect £26k to £136k of revenue. That range is an assumption, because the data has no campaign history.`,
+      ],
+      stats: [
+        { value: "1,941", label: "Customers to target" },
+        { value: "75%", label: "Of the revenue at risk they hold" },
+        { value: "£905k", label: "Revenue at risk next quarter (estimate)" },
+      ],
+      figures: [
+        fig("retail-sql-dashboard", "scenario_range.png", "Revenue a retention campaign could protect at 5%, 10% and 20% fewer lapses, for winter and all-season lapse rates.", "A scenario, not a measurement: the revenue a retention campaign could protect under assumed reductions in lapses.", 1260, 630),
+      ],
+    },
+    {
+      kicker: "Engineering",
+      heading: "Built to be checked",
+      body: [
+        `All the SQL is visible in the repo. **88 tests** check that revenue adds up across every layer, that keys are unique and that the cleaning matches an independent version written another way (with the pandas library). Some tests need the full dataset and are skipped in **GitHub Actions**, which runs on a small synthetic sample.`,
+        `The results appear in a **Streamlit** dashboard, and the tables are exported as CSV for Tableau or Power BI.`,
+      ],
+    },
+    {
+      kicker: "Be skeptical",
+      heading: "Honest limits",
+      tileTone: "limits",
+      tiles: [
+        { title: "Not profit", text: "The data has no costs or margins, so revenue is not profit." },
+        { title: "Assumed effect", text: "The campaign effect is assumed; a hold-out test is how you would measure it." },
+        { title: "One winter", text: "Winter lapse rates come from one winter." },
+        { title: "Guest checkouts", text: "Guest checkouts (13.3% of revenue) have no customer ID, so they sit outside cohorts and segments." },
+        { title: "Returns not linked", text: "Returns cannot be linked to the original sale." },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "BioNER: Multi-task Biomedical NER": [
+    {
+      kicker: "The task",
+      heading: "Finding names in medical text",
+      body: [
+        `Each word gets a tag such as "start of a chemical" or "not an entity". BioBERT splits rare words into smaller pieces, so the code lines the tags up with those pieces, and long sentences are split into windows so that no word is cut off.`,
+        `A name counts as correct only if both its type and its exact start and end are right. The score, called F1, rewards finding the right names without flagging wrong ones, and 100 is perfect. The best training round is picked on a separate validation split, the test split is scored once, and every setup was trained 3 times from different random starting points and averaged.`,
+      ],
+      tileTone: "steps",
+      tiles: [
+        { title: "BC2GM", text: "Genes" },
+        { title: "BC4CHEMD", text: "Chemicals" },
+        { title: "BC5CDR", text: "Chemicals and diseases" },
+        { title: "JNLPBA", text: "Proteins, DNA, RNA and cell types" },
+        { title: "NCBI Disease", text: "Diseases" },
+      ],
+    },
+    {
+      kicker: "Results",
+      heading: "Separate models vs one shared model",
+      body: [
+        `With separate models, the average F1 across the five datasets was **85.4**. BC4CHEMD scored 90.3 and JNLPBA, the hardest, scored 75.4, with cell lines the weakest name type.`,
+        `One BioBERT with a small output layer per dataset replaces five models, which is **80%** fewer. It averaged 85.13 and 85.18 (two ways of choosing which dataset to train on at each step), against 85.38 for separate models. It was slightly lower on BC2GM, BC4CHEMD and NCBI Disease and level on JNLPBA and BC5CDR.`,
+        `So one model can do the work of five at almost no accuracy cost, but it does not do better.`,
+      ],
+      charts: [
+        {
+          type: "grouped",
+          title: "F1 by dataset (higher is better)",
+          decimals: 1,
+          min: 70,
+          max: 95,
+          series: ["Separate models", "Shared model (proportional)", "Shared model (temperature 2)"],
+          categories: [
+            { label: "BC4CHEMD", values: [90.25, 89.96, 89.86] },
+            { label: "BC5CDR", values: [88.99, 89.09, 89.35] },
+            { label: "NCBI Disease", values: [88.79, 88.21, 88.51] },
+            { label: "BC2GM", values: [83.48, 82.9, 82.92] },
+            { label: "JNLPBA", values: [75.38, 75.48, 75.27] },
+          ],
+          note: "The axis starts at 70. Each value is the average of 3 runs.",
+        },
+        {
+          type: "bars",
+          title: "Average F1 across the five datasets",
+          decimals: 2,
+          min: 80,
+          max: 88,
+          items: [
+            { label: "Five separate models", value: 85.38, tone: "good" },
+            { label: "One shared model (temperature 2)", value: 85.18, tone: "accent" },
+            { label: "One shared model (proportional)", value: 85.13, tone: "accent" },
+          ],
+          note: "The axis starts at 80.",
+        },
+      ],
+    },
+    {
+      kicker: "A rebuild",
+      heading: "What an audit changed",
+      body: [
+        `My original thesis notebooks reported per-word scores of 0.71 to 0.93, but their "multi-task" run had trained five separate models and the test sets were used to pick the best round, so those numbers are not comparable. A code audit found this and I rebuilt the project with a test suite that runs on a CPU in about 7 seconds.`,
+      ],
+    },
+    {
+      kicker: "Be skeptical",
+      heading: "Honest limits",
+      tileTone: "limits",
+      tiles: [
+        { title: "Rough spread", text: "Three runs give a rough spread, not a firm margin of error, so gaps smaller than the run-to-run variation count as ties." },
+        { title: "No tuning", text: "Every model used the same training settings with no tuning." },
+        { title: "JNLPBA re-joined", text: "About 20% of JNLPBA sentences were cut in the middle of a name, so I re-joined them, which means its scores differ from papers that use the raw files." },
+        { title: "Overlap", text: "A few test sentences also appear in training." },
+        { title: "Scope", text: "I did not test training on one dataset and testing on another, and everything is English research abstracts." },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "Experimentation Toolkit": [
+    {
+      kicker: "What it is",
+      heading: "A careful A/B test, start to finish",
+      body: [
+        `An A/B test shows one group of users a change and holds back a control group. This toolkit covers the whole job on a public Criteo ad experiment with **13,979,592** users, where 85% were shown a campaign and 15% were held back. It ends in a one-page decision memo and a live sample-size calculator you can try.`,
+      ],
+      tileTone: "steps",
+      tiles: [
+        { title: "How many users?", text: "A sample-size calculator." },
+        { title: "Was it fair?", text: "Checks that the groups were split fairly." },
+        { title: "How big is the effect?", text: "The effect with a margin of error." },
+        { title: "Sharper answers", text: "A way to get a tighter answer from the same data." },
+        { title: "Ship or not?", text: "A ship or do-not-ship rule." },
+        { title: "Who to target?", text: "A model that finds which users are worth targeting." },
+      ],
+    },
+    {
+      kicker: "Validity",
+      heading: "A small mismatch changed the answer",
+      body: [
+        `The group sizes matched the plan. Even so, a model could guess which group a user was in slightly better than a coin flip (**51.1%**, where 50% would be a perfectly fair split), so the two groups were slightly mismatched.`,
+        `A simple comparison would have said the ad made visits **27.1%** more likely. After correcting for the mismatch, the ad made visits **18.6%** more likely, with a range the true effect very likely falls in of 17.6% to 19.6%. **4.04%** of users visited the advertiser's site without the ad and 4.78% with it.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "More visits with the ad",
+          unit: "%",
+          decimals: 1,
+          max: 30,
+          items: [
+            { label: "Simple comparison", value: 27.1, tone: "warn" },
+            { label: "After correcting the mismatch", value: 18.6, tone: "good" },
+          ],
+          note: "The corrected figure has a 95% range of 17.6% to 19.6%.",
+        },
+        {
+          type: "grouped",
+          title: "Share of users who visited the site",
+          unit: "%",
+          decimals: 2,
+          min: 0,
+          max: 6,
+          series: ["Without the ad", "With the ad"],
+          categories: [
+            { label: "Simple comparison", values: [3.82, 4.85] },
+            { label: "After correcting the mismatch", values: [4.04, 4.78] },
+          ],
+        },
+      ],
+    },
+    {
+      kicker: "The decision",
+      heading: "Ship, with a stated assumption",
+      body: [
+        `The data has no cost or revenue, so the minimum worthwhile lift is a placeholder of **12.4%** more visits. The corrected result, 17.6% to 19.6% more visits, is above it across its whole range, so the decision is to ship.`,
+        `The call does depend on the bar you set. The chart shows how the answer changes if you demand more.`,
+      ],
+      charts: [
+        {
+          type: "ladder",
+          title: "If the minimum worthwhile lift were...",
+          items: [
+            { label: "6.2% more visits", outcome: "ship" },
+            { label: "12.4% more visits (placeholder)", outcome: "ship" },
+            { label: "18.6% more visits", outcome: "run" },
+            { label: "24.8% more visits", outcome: "stop" },
+          ],
+          note: "Thresholds are converted from the repo's thresholds using the corrected control visit rate of 4.035%.",
+        },
+      ],
+    },
+    {
+      kicker: "Precision",
+      heading: "Less noise from the same data",
+      body: [
+        `Using what is already known about each user before the test (such as past behaviour) removes some random noise. The simple version (called CUPED) cut the noise in the result by **25.0%**. The machine-learning version (CUPAC) cut it by **30.5%**, so the same precision needs 30.5% fewer users.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Random noise removed from the result",
+          unit: "%",
+          decimals: 1,
+          max: 40,
+          items: [
+            { label: "Simple correction (CUPED)", value: 25.0, tone: "accent" },
+            { label: "Machine-learning correction (CUPAC)", value: 30.5, tone: "good" },
+          ],
+        },
+      ],
+    },
+    {
+      kicker: "Self-check",
+      heading: "Does the toolkit check itself?",
+      body: [
+        `Comparing two random halves of the same group, where there is no real difference (an A/A test), falsely flagged a difference **4.7%** of the time, against 5% expected. The sample-size calculator predicted the test would detect a real effect 80% of the time at its planned size, and it did so **80.45%** of the time on real data.`,
+        `The unit tests compare each statistic with a textbook value, a second library or a simulation.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "False alarms when nothing changed",
+          unit: "%",
+          decimals: 1,
+          max: 8,
+          items: [
+            { label: "Expected", value: 5.0, tone: "muted" },
+            { label: "Measured (2,000 repeats)", value: 4.7, tone: "good" },
+          ],
+        },
+        {
+          type: "bars",
+          title: "Chance of detecting a real effect",
+          unit: "%",
+          decimals: 2,
+          max: 100,
+          items: [
+            { label: "Predicted by the calculator", value: 80.0, tone: "muted" },
+            { label: "Measured on real data", value: 80.45, tone: "good" },
+          ],
+        },
+      ],
+    },
+    {
+      kicker: "Targeting",
+      heading: "Who to show the ad to",
+      body: [
+        `Showing the ad only to the 10% of users a model picks as most likely to respond would capture **59.4%** of the extra visits. Ranking users by how likely they are to visit anyway captures 50.8%, and a second model design (57.6%) did not beat the simple ranking.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Share of the extra visits captured by treating the top 10%",
+          unit: "%",
+          decimals: 1,
+          max: 70,
+          items: [
+            { label: "Model that predicts who responds", value: 59.4, tone: "good" },
+            { label: "Second model design", value: 57.6, tone: "accent" },
+            { label: "Rank by likelihood to visit anyway", value: 50.8, tone: "muted" },
+            { label: "Random 10% of users", value: 10.0, tone: "warn" },
+          ],
+        },
+      ],
+      figures: [
+        {
+          src: "/images/experimentation-toolkit/uplift_qini_curves.png",
+          alt: "Targeting curves comparing a model that predicts who benefits with a model that predicts who is likely to visit anyway.",
+          caption:
+            "Treating the highest-ranked users first captures most of the extra visits. The left chart shows how fast the gains build up, and the right chart shows how little the targeting models beat simply ranking by likelihood to visit.",
+          width: 1546,
+          height: 558,
+        },
+      ],
+    },
+    {
+      kicker: "Be skeptical",
+      heading: "Honest limits",
+      tileTone: "limits",
+      tiles: [
+        { title: "Not everyone saw the ad", text: "Only 3.6% of treated users actually saw it, so this measures the effect of being assigned to the campaign, not of seeing the ad." },
+        { title: "Assumed bar", text: "The bar for shipping is an assumption." },
+        { title: "One experiment", text: "It is one experiment over one period, with no checks for the effect wearing off or fading." },
+        { title: "One run", text: "The notebook outputs come from one run." },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "Rossmann Sales Forecasting": [
+    {
+      kicker: "How it works",
+      heading: "One model for every store",
+      body: [
+        `For every open store it forecasts daily sales 42 days (six weeks) ahead, so managers can plan staff and stock. One model (**LightGBM**, a fast tree-based forecasting model) learns from all stores at once instead of fitting one model per store.`,
+        `It learns from each store's sales history (lagged by at least six weeks so nothing from the future leaks in), the planned promotion calendar, holidays and open or closed days, which are known in advance. A tool called **SHAP** explains what drives each forecast.`,
+      ],
+      stats: [
+        { value: "1,115", label: "Stores forecast" },
+        { value: "42", label: "Days ahead" },
+        { value: "3", label: "Rolling tests" },
+      ],
+    },
+    {
+      kicker: "Results",
+      heading: "Half the error of the best simple rule",
+      body: [
+        `Three rolling tests: fit on everything before a start date, forecast the next 42 days, then repeat at a later start date. The start dates (August 2014, December 2014 covering Christmas, and June 2015) were fixed before any model was run.`,
+        `Error is the total miss divided by total sales (called WAPE). The forecast is off by **9.2%**, against **18.9%** for the strongest simple rule, the average of the same weekday over the last four weeks, so the error is cut by **51%**. A Random Forest scored 10.4%.`,
+        `On a 100-store sample, Prophet (a popular forecasting library) fitted separately per store scored 17.9%, or 12.5% with promo and holiday information, against 9.4% for LightGBM on the same store-days.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Forecast error across all three tests (lower is better)",
+          unit: "%",
+          decimals: 1,
+          max: 22,
+          items: [
+            { label: "LightGBM (used)", value: 9.2, tone: "good" },
+            { label: "Random Forest", value: 10.4, tone: "accent" },
+            { label: "Same weekday, last four weeks", value: 18.9, tone: "warn" },
+          ],
+        },
+        {
+          type: "bars",
+          title: "On a 100-store sample (lower is better)",
+          unit: "%",
+          decimals: 1,
+          max: 22,
+          items: [
+            { label: "LightGBM", value: 9.4, tone: "good" },
+            { label: "Prophet with promos and holidays", value: 12.5, tone: "accent" },
+            { label: "Prophet", value: 17.9, tone: "warn" },
+          ],
+        },
+      ],
+    },
+    {
+      kicker: "Uncertainty",
+      heading: "Ranges that are honest about when they fail",
+      body: [
+        `Every forecast comes with a range meant to contain the actual sales 90% of the time. In the tests, actual sales landed inside it **86.4%** of the time overall, a little under the target, and only **76.7%** in the Christmas window, because sales behave differently from the period used to set the ranges.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Actual sales inside the 90% range",
+          unit: "%",
+          decimals: 1,
+          min: 50,
+          max: 100,
+          items: [
+            { label: "Target", value: 90, tone: "muted" },
+            { label: "All tests", value: 86.4, tone: "good" },
+            { label: "Christmas window", value: 76.7, tone: "warn" },
+          ],
+          note: "The axis starts at 50%.",
+        },
+      ],
+    },
+    {
+      kicker: "Where it struggles",
+      heading: "Reopened stores, and the right level to plan at",
+      body: [
+        `Store-days in the 14 days after a store reopens from a closure of two weeks or more are 1.3% of the data but have **16.4%** error, against 9.2% for the rest.`,
+        `Planning at a coarser level is far steadier: 9.3% error for one store-day, 5.7% for one store-week and **2.8%** for the whole chain by week.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Error by planning level",
+          unit: "%",
+          decimals: 1,
+          max: 18,
+          items: [
+            { label: "One store, one day", value: 9.3, tone: "warn" },
+            { label: "One store, one week", value: 5.7, tone: "accent" },
+            { label: "Whole chain, one week", value: 2.8, tone: "good" },
+          ],
+        },
+        {
+          type: "bars",
+          title: "Error after a long closure",
+          unit: "%",
+          decimals: 1,
+          max: 18,
+          items: [
+            { label: "14 days after a reopening", value: 16.4, tone: "warn" },
+            { label: "All other store-days", value: 9.2, tone: "good" },
+          ],
+        },
+      ],
+    },
+    {
+      kicker: "Be skeptical",
+      heading: "Honest limits",
+      tileTone: "limits",
+      tiles: [
+        { title: "One chain, one period", text: "The data covers one chain and one period (January 2013 to July 2015)." },
+        { title: "Few test windows", text: "Three test windows is a small number." },
+        { title: "Known in advance", text: "The promo calendar, holidays and opening days are assumed known in advance." },
+        { title: "Settings fixed up front", text: "Settings were fixed up front rather than tuned." },
+        { title: "Prophet on a sample", text: "Prophet was run on a random sample of stores, not all of them." },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "Job Postings Insights": [
+    {
+      kicker: "Reading the postings",
+      heading: "Turning free text into facts",
+      body: [
+        `Job postings are messy free text, so rules written for this project pull out skills, pay (converted to a yearly US dollar figure) and remote, hybrid or on-site status. One command rebuilds every result from the raw file, and automatic checks run in **GitHub Actions**.`,
+        `The original version matched skills by simple text search and tagged **100%** of postings with the programming language "R"; the new rules do this for **0.5%**.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: 'Postings wrongly tagged with the language "R"',
+          unit: "%",
+          decimals: 1,
+          max: 100,
+          items: [
+            { label: "Original text search", value: 100, tone: "warn" },
+            { label: "New rules", value: 0.5, tone: "good" },
+          ],
+        },
+      ],
+    },
+    {
+      kicker: "Skills",
+      heading: "36% better skill detection",
+      body: [
+        `On 40 postings with reference answers, the new rules scored **0.64** out of 1 against 0.47 for the original method on the same shortened skill list, which is **36%** better (the score, called F1, rewards finding real skills without adding false ones). On the full skill list they scored **0.73**.`,
+        `A small free AI model (Qwen2.5-1.5B) running on a laptop processor scored lower, 0.42.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Skill detection score on the same shortened skill list",
+          decimals: 2,
+          max: 1,
+          items: [
+            { label: "New rules", value: 0.64, tone: "good" },
+            { label: "Original method", value: 0.47, tone: "warn" },
+          ],
+          note: "On the full skill list the new rules scored 0.73.",
+        },
+      ],
+    },
+    {
+      kicker: "Pay",
+      heading: "Pay estimates 43% closer",
+      body: [
+        `Using the **50,700** postings that state pay, a ridge regression model (a simple, stable way of fitting a line to data) was off by $24,613 on average, against $43,075 for guessing the overall median salary: 43% less error. Against a smarter guess, the median for the same role and experience level ($35,198), it has **30%** less error.`,
+        `It was tested on job titles it had never seen, and a more complex model (gradient boosting) did the same.`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "Average pay error (lower is better)",
+          decimals: 0,
+          max: 48000,
+          items: [
+            { label: "Ridge model", value: 24613, display: "$24,613", tone: "good" },
+            { label: "Median for same role and level", value: 35198, display: "$35,198", tone: "accent" },
+            { label: "Overall median", value: 43075, display: "$43,075", tone: "warn" },
+          ],
+        },
+      ],
+    },
+    {
+      kicker: "Skill groups",
+      heading: "20 stable groups of related skills",
+      body: [
+        `The **75,576** postings with at least two hard skills are grouped by skill overlap into 20 groups (clusters). One group is led by Python, SQL and Java, and **59%** of its titles are data, software or AI roles.`,
+        `Re-running with five different random starting points gave nearly the same groups (agreement **0.80** out of 1), and the groups are more clearly separated than the original method's, with a standard separation score of 0.27 against 0.10 (the two are not strictly comparable).`,
+      ],
+      charts: [
+        {
+          type: "bars",
+          title: "How clearly separated the groups are",
+          decimals: 2,
+          max: 0.35,
+          items: [
+            { label: "New method", value: 0.27, tone: "good" },
+            { label: "Original method", value: 0.1, tone: "warn" },
+          ],
+          note: "The two scores are not strictly comparable.",
+        },
+      ],
+    },
+    {
+      kicker: "Sponsorship",
+      heading: "Which companies have sponsored H-1B visas",
+      body: [
+        `Company names are matched to public USCIS filings for 2021 to 2023, and **42.6%** of postings matched a company. A spot check of 40 matches found the same company every time. A match shows a company has sponsored before, not that a particular job will.`,
+        `The rule that spots sponsorship-friendly wording was right **64%** of the time, so treat it as a rough filter.`,
+      ],
+      stats: [
+        { value: "42.6%", label: "Of postings matched a sponsoring company" },
+        { value: "64%", label: "Of sponsorship-wording flags were right" },
+      ],
+    },
+    {
+      kicker: "What it found",
+      heading: "Which skills go with higher pay",
+      body: [
+        `After adjusting for role, seniority and work arrangement, postings that list TypeScript are associated with **16%** higher pay, Generative AI 15%, Machine Learning 13% and Go 12%. Remote pay is not clearly different: it is 6.3% higher, but the range runs from 2.7% lower to 21.2% higher.`,
+        `These findings come from the **3,428** data, AI and software postings that state a salary, and they show association, not proof that learning a skill raises pay.`,
+      ],
+      figures: [
+        fig("job-postings-insights", "skill_premium.png", "Adjusted pay difference when a posting lists each skill, with 95% intervals. TypeScript, Generative AI, Machine Learning and Go are associated with higher pay.", "Pay associated with each skill among 3,428 tech postings that state pay. Coloured bars have an interval that excludes zero. These are associations, not causal effects.", 1208, 803),
+      ],
+    },
+    {
+      kicker: "Be skeptical",
+      heading: "Honest limits",
+      tileTone: "limits",
+      tiles: [
+        { title: "Small test set", text: "The 40-posting test set is small and was labelled in a single pass, so the scores have wide margins of error." },
+        { title: "Short window", text: "The data covers about three weeks of spring 2024, so it says nothing about trends over time." },
+        { title: "Not advice", text: "It is not legal or immigration advice." },
+        { title: "Slow first load", text: "The free live app sleeps when idle, so the first load can take a few seconds." },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "AI DevOps Agent": [
+    {
+      kicker: "What it is",
+      heading: "An assistant for the engineers who keep sites running",
+      body: [
+        `A deployment is one release of a website to the internet, and Vercel is the service that hosts it. I co-built this with Ronit Gandhi at **Zero to Agent**, the Vercel x Google DeepMind hackathon, in 8 hours. The safety rules, tests and bug fixes below are work I added afterwards.`,
+      ],
+      stats: [
+        { value: "8 hrs", label: "Hackathon build time, team project" },
+        { value: "Daily", label: "Failure and uptime checks" },
+        { value: "Draft", label: "Every fix is a draft a person approves" },
+      ],
+      tileTone: "steps",
+      tiles: [
+        { title: "Detect", text: "A scheduled job (a task that runs on a timer) runs once a day, finds new failed deployments and websites that stopped responding, records each as an incident and posts one Slack alert per failure. The daily job alone never changes any code." },
+        { title: "Diagnose and draft a fix", text: "Asked to investigate, the agent (powered by Google's Gemini 3 Flash model) reads logs and code through the Vercel and GitHub APIs and opens a pull request with a fix." },
+        { title: "Control from Slack", text: "Plain-English /devops commands roll a project back to its last working version, list open incidents, check deployment status or compare settings between two projects." },
+        { title: "Remember", text: "Supabase, a hosted database, keeps the incident history, and a weekly summary posts to Slack every Saturday." },
+      ],
+    },
+    {
+      kicker: "Safety first",
+      heading: "It acts on real systems, so it is fenced in",
+      tileTone: "steps",
+      tiles: [
+        { title: "Drafts only", text: "Its pull requests open as drafts so a person has to approve them." },
+        { title: "Protected code", text: "It cannot commit straight to the main branch (the live copy of the code) and cannot edit secret or CI files." },
+        { title: "Secret check", text: "It refuses a change that looks like it contains a password or key (a pattern check, not a guarantee)." },
+        { title: "Dry-run mode", text: "A dry-run mode reports what it would do without doing it." },
+      ],
+    },
+    {
+      kicker: "Engineering",
+      heading: "Tested and hardened afterwards",
+      body: [
+        `I added automated tests for the safety rules, the scheduled-job security and the monitor, plus a GitHub Actions workflow that runs a type check, the tests and a build.`,
+      ],
+      tileTone: "steps",
+      tiles: [
+        { title: "Fixed: rejected incidents", text: "Uptime incidents that the database was rejecting." },
+        { title: "Fixed: open endpoint", text: "A scheduled-job web address that accepted requests when its secret key was not set." },
+        { title: "Fixed: leaked secrets", text: "A deploy script that printed secret values to the terminal." },
+      ],
+    },
+    {
+      kicker: "Be skeptical",
+      heading: "Honest limits",
+      tileTone: "limits",
+      tiles: [
+        { title: "No measured accuracy", text: "The repository has no measured numbers for how often the agent's fixes are correct, so I do not quote any." },
+        { title: "Daily only", text: "The monitor runs once a day because Vercel's free plan only allows daily scheduled jobs." },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "Growth Mindset Causal Analysis": [
+    {
+      kicker: "The question",
+      heading: "Does the program work, or do the students just differ?",
+      body: [
+        `A growth mindset program teaches students that ability grows with effort. The hard part is that the students who join may differ to begin with, so a simple comparison can mislead. I used several methods that estimate the effect of the program rather than a simple correlation.`,
+        `The data is **10,391 synthetic student records** (made up but realistic) from 76 schools, modeled on the National Study of Learning Mindsets, with a continuous achievement score as the outcome. **32.6%** of the students were in the program.`,
+      ],
+      stats: [
+        { value: "10,391", label: "Synthetic student records" },
+        { value: "76", label: "Schools" },
+        { value: "32.6%", label: "In the program" },
+        { value: "7", label: "Ways of estimating the effect" },
+      ],
+    },
+    {
+      kicker: "The methods",
+      heading: "Seven specifications, four method families",
+      tileTone: "steps",
+      tiles: [
+        { title: "Regression", text: "Regression adjustment accounts for differences between students." },
+        { title: "IPW", text: "Re-weights students so the two groups look alike." },
+        { title: "T-Learner and S-Learner", text: "Models that predict achievement with and without the program, using Random Forest and XGBoost." },
+        { title: "Causal Forest", text: "A tree method (EconML) built to estimate effects." },
+      ],
+    },
+    {
+      kicker: "Results",
+      heading: "Every method agrees",
+      body: [
+        `In every specification the program raised achievement by **0.41 to 0.42** outcome units on average (the average treatment effect, or ATE). That the answer barely depends on the method is a good sign. Causal Forest has a much wider range, 0.208 to 0.623.`,
+        `I checked that the two groups were comparable using propensity scores (each student's chance of joining the program), overlap checks, and a balance plot. Adjusting moved the raw difference of 0.457 down to about 0.41. I presented the results on an academic research poster.`,
+      ],
+      charts: [
+        {
+          type: "range",
+          title: "Effect on achievement, in outcome units (95% range)",
+          min: 0.2,
+          max: 0.65,
+          items: [
+            { label: "Raw difference, no adjustment", point: 0.457, tone: "warn" },
+            { label: "Linear regression", point: 0.413, low: 0.388, high: 0.438, tone: "good" },
+            { label: "Inverse propensity weighting", point: 0.415, low: 0.387, high: 0.442, tone: "good" },
+            { label: "T-Learner (Random Forest)", point: 0.422, low: 0.409, high: 0.434, tone: "good" },
+            { label: "T-Learner (XGBoost)", point: 0.422, low: 0.41, high: 0.434, tone: "good" },
+            { label: "S-Learner (Random Forest)", point: 0.421, low: 0.409, high: 0.434, tone: "good" },
+            { label: "S-Learner (XGBoost)", point: 0.421, low: 0.411, high: 0.431, tone: "good" },
+            { label: "Causal Forest", point: 0.415, low: 0.208, high: 0.623, tone: "accent" },
+          ],
+          note: "The axis starts at 0.2. Regression and IPW dots are the midpoints of their reported ranges.",
+        },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "True Image Caption Generator": [
+    {
+      kicker: "The task",
+      heading: "Teaching a computer to describe a photo",
+      body: [
+        `This undergraduate thesis project writes a caption for an image. I built two designs in **TensorFlow/Keras** and compared them. Both were trained on **Flickr8k**, a public set of photos with human-written captions, covering text preparation, image feature extraction and caption generation.`,
+      ],
+      tileTone: "steps",
+      tiles: [
+        { title: "CNN + LSTM", text: "A CNN (a network that reads images) using VGG16 or Xception image features, feeding an LSTM (a network that writes text one word at a time)." },
+        { title: "InceptionV3 + Transformer", text: "An encoder-decoder with multi-head attention, the part that lets it focus on different image regions while it writes." },
+      ],
+    },
+    {
+      kicker: "Results",
+      heading: "Comparing the captions",
+      body: [
+        `I compared captions with **BLEU**, a 0 to 1 score for how closely a caption matches the human-written ones. Per-image scores were **0.71 to 0.73** on strong examples and near 0 on failures, which showed the Transformer producing more accurate captions.`,
+        `The work is documented in a full undergraduate thesis report and includes a command-line caption generator.`,
+      ],
+      stats: [
+        { value: "0.73", label: "Top per-image BLEU score on strong examples" },
+        { value: "0.71", label: "Lower end of the strong examples" },
+        { value: "2", label: "Captioning designs compared" },
+      ],
+    },
+  ],
+
+  /* ------------------------------------------------------------------ */
+  "Enhancing Airbnb Revenue: Dynamic Price Modeling": [
+    {
+      kicker: "The work",
+      heading: "Predicting a fair price from a listing's features",
+      body: [
+        `I queried and processed **10K+ Airbnb listings** using SQL and Python for data cleaning, transformation and exploratory analysis (looking for patterns) to identify ways to raise revenue.`,
+        `Regression models (a statistical method that predicts a number, here a price, from other facts about the listing) built and evaluated in **R** improved pricing prediction accuracy **25%** over the baseline.`,
+      ],
+      stats: [
+        { value: "25%", label: "Better pricing prediction accuracy than the baseline" },
+        { value: "10K+", label: "Listings analyzed" },
+      ],
+    },
+    {
+      kicker: "Delivery",
+      heading: "Dashboards for hosts and property managers",
+      body: [
+        `I designed interactive Tableau dashboards to visualize trends in pricing, demand and location-based performance for stakeholders. The insights support data-driven pricing strategies for hosts and property managers.`,
+      ],
+    },
+  ],
+};
