@@ -6,7 +6,7 @@ Live at: [vanshikagurbani.github.io](https://vanshikagurbani.github.io)
 
 ## About
 
-I build ML systems, work at the intersection of research and engineering, and care about making AI that actually solves real problems. Currently an AI Engineer & Research Assistant at the Particulate Systems Lab at Rutgers.
+I build ML systems, work at the intersection of research and engineering, and care about making AI that actually solves real problems.
 
 This portfolio covers my projects, experience, and background across AI/ML, NLP, data science, and full-stack development.
 
